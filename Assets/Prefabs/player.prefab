@@ -293,7 +293,7 @@ MonoBehaviour:
   rightWall: 0
   rb: {fileID: 7628640688249597258}
   maxDashes: 1
-  dashCooldown: 1
+  dashCooldown: 0.5
   dashTimer: 0
 --- !u!1 &8111869218394675996
 GameObject:

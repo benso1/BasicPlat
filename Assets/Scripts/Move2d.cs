@@ -1,27 +1,34 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Move2d : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public float jumpHeight = 5f;
+    public float doubleJumpHeight = 2f;
     public bool isGrounded = false;
     public bool wallClimb = false;
     public bool leftWall = false;
     public bool rightWall = false;
     public Rigidbody2D rb;
-    private Vector3 movement;
+    private Vector2 movement;
     public int maxDashes = 2;
+    public int maxJumps = 1;
     private int numDashes = 2;
+    private int doubleJump = 1;
     private Vector2 dashMovement;
     private float dashLengthX = 5f;
     private float dashLengthY = 5f;
-    private float dashX = 0.2f;
-    private float dashY = 0.2f;
+    private float dashX = 5f;
+    private float dashY = 5f;
     private bool dashActive = false;
-    public float dashCooldown = 1f;
+    //private bool dashCooling = false;
+    public float dashCooldown = 0.25f;
+    public float dashLength = 0.25f;
     public float dashTimer = 0f;
+    //public float dashCooldownTimer = 0f;
     void Start(){
         rb = this.GetComponent<Rigidbody2D>();
     }
@@ -34,14 +41,15 @@ public class Move2d : MonoBehaviour
             dashTimer = 0;
             dashActive = false;
         }
-        movement = new Vector3(Input.GetAxis("Horizontal"), 0f, 0f);
+        movement = new Vector2(Input.GetAxis("Horizontal"), 0f);
     }
 
     void FixedUpdate()
     {
         Jump();
-        moveCharacter();
         Dash();
+        MoveCharacter();
+        Reset();
     }
 
     void DashLoc(){
@@ -65,34 +73,45 @@ public class Move2d : MonoBehaviour
         }
         if(dashX == 0 && dashY == 0){
             dashX = dashLengthX;
-        }
+        } //8 Direction Dash Setup
         dashMovement = new Vector2(dashX, dashY);
     }
     void Dash(){
         if(isGrounded && !dashActive){
-            numDashes = maxDashes;
+            numDashes = maxDashes; //Resets Dashes
         }
-        if(Input.GetButtonDown("Fire3") && numDashes > 0 && !dashActive){
+        if(Input.GetButtonDown("Fire3") && numDashes > 0 && !dashActive){ //Fire3 is Left Shift
             DashLoc();
             rb.AddForce(dashMovement, ForceMode2D.Impulse);
             numDashes--;
             dashActive = true;
-            dashTimer = dashCooldown;
-        }
-        //rb.velocity = dashMovement;
-        //Fire3 is Left Shift, Can change in unity/edit/project settings/input/axes
+            dashTimer = dashLength;
+        } 
     }
-    void moveCharacter()
+    void MoveCharacter()
     {
         rb.AddForce(movement * moveSpeed); //Slidy with accelleration
-        //rb.velocity = dashMovement * moveSpeed; //Dash?
-        //transform.position += movement * Time.deltaTime * moveSpeed; //Normal movement
+        //rb.velocity = new Vector2(Input.GetAxis("Horizontal") * moveSpeed, rb.velocity.y); //Dash?
     }
 
     void Jump()
     {
-        if(Input.GetButtonDown("Jump") && isGrounded == true){
-            rb.AddForce(new Vector2(0f, jumpHeight), ForceMode2D.Impulse); //Jump
+        if(isGrounded){
+            doubleJump = maxJumps;
+            if(Input.GetButtonDown("Jump")){
+                rb.AddForce(new Vector2(0f, jumpHeight), ForceMode2D.Impulse); //Jump
+            }
+        }
+        else if(Input.GetButtonDown("Jump") && doubleJump > 0){
+            doubleJump--;
+             rb.AddForce(new Vector2(0f, doubleJumpHeight), ForceMode2D.Impulse); //Double Jump
+        }
+    }
+
+    void Reset()
+    {
+        if(Input.GetButtonDown("Cancel")){
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //Restart Scene
         }
     }
 } 

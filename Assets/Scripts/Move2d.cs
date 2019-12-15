@@ -8,6 +8,8 @@ public class Move2d : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpHeight = 5f;
     public float doubleJumpHeight = 2f;
+    public float wallJumpX = 4f;
+    public float wallJumpY = 3f;
     private float dashLengthX = 5f;
     private float dashLengthY = 5f;
     private float dashX = 5f;
@@ -48,7 +50,6 @@ public class Move2d : MonoBehaviour
 
     void FixedUpdate()
     {
-        Jump();
         Dash();
         WallJump();
         MoveCharacter();
@@ -97,20 +98,6 @@ public class Move2d : MonoBehaviour
         //rb.velocity = new Vector2(Input.GetAxis("Horizontal") * moveSpeed, rb.velocity.y); //Dash?
     }
 
-    void Jump()
-    {
-        if(isGrounded){
-            doubleJump = maxJumps;
-            if(Input.GetButtonDown("Jump")){
-                rb.AddForce(new Vector2(0f, jumpHeight), ForceMode2D.Impulse); //Jump
-            }
-        }
-        else if(Input.GetButtonDown("Jump") && doubleJump > 0){
-            doubleJump--;
-             rb.AddForce(new Vector2(0f, doubleJumpHeight), ForceMode2D.Impulse); //Double Jump
-        }
-    }
-
     void Reset()
     {
         if(Input.GetButtonDown("Cancel")){
@@ -119,13 +106,29 @@ public class Move2d : MonoBehaviour
     }
 
     void WallJump(){
-        if(!isGrounded){
-            if(leftWall || rightWall){
-                rb.sharedMaterial = wallFriction;
+        if(isGrounded){
+            rb.sharedMaterial = noFriction;
+            doubleJump = maxJumps;
+            if(Input.GetButtonDown("Jump")){
+                rb.AddForce(new Vector2(0f, jumpHeight), ForceMode2D.Impulse); //Jump
             }
         }
         else{
-            rb.sharedMaterial = noFriction;
+            if(leftWall || rightWall){
+                rb.sharedMaterial = wallFriction;
+            }
+            if(Input.GetButtonDown("Jump")){
+                if(leftWall){
+                    rb.AddForce(new Vector2(wallJumpX, wallJumpY), ForceMode2D.Impulse); //Wall Jump from Left
+                }
+                else if(rightWall){
+                    rb.AddForce(new Vector2(-wallJumpX, wallJumpY), ForceMode2D.Impulse); //Wall Jump from Right
+                }
+                else if(doubleJump > 0){
+                    doubleJump--;
+                    rb.AddForce(new Vector2(0f, doubleJumpHeight), ForceMode2D.Impulse); //Double Jump
+                }
+            }
         }
     }
 } 

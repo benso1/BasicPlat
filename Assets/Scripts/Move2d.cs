@@ -8,26 +8,28 @@ public class Move2d : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpHeight = 5f;
     public float doubleJumpHeight = 2f;
-    public bool isGrounded = false;
-    public bool wallClimb = false;
-    public bool leftWall = false;
-    public bool rightWall = false;
-    public Rigidbody2D rb;
-    private Vector2 movement;
-    public int maxDashes = 2;
-    public int maxJumps = 1;
-    private int numDashes = 2;
-    private int doubleJump = 1;
-    private Vector2 dashMovement;
     private float dashLengthX = 5f;
     private float dashLengthY = 5f;
     private float dashX = 5f;
     private float dashY = 5f;
-    private bool dashActive = false;
-    //private bool dashCooling = false;
-    public float dashCooldown = 0.25f;
     public float dashLength = 0.25f;
     public float dashTimer = 0f;
+    public int maxDashes = 2;
+    public int maxJumps = 1;
+    private int numDashes = 2;
+    private int doubleJump = 1;
+    public bool isGrounded = false;
+    public bool wallClimb = false;
+    public bool leftWall = false;
+    public bool rightWall = false;
+    private bool dashActive = false;
+    public Rigidbody2D rb;
+    private Vector2 movement;
+    private Vector2 dashMovement;
+    public PhysicsMaterial2D wallFriction;
+    public PhysicsMaterial2D noFriction;
+    //private bool dashCooling = false;
+    //public float dashCooldown = 0.25f;
     //public float dashCooldownTimer = 0f;
     void Start(){
         rb = this.GetComponent<Rigidbody2D>();
@@ -48,6 +50,7 @@ public class Move2d : MonoBehaviour
     {
         Jump();
         Dash();
+        WallJump();
         MoveCharacter();
         Reset();
     }
@@ -112,6 +115,17 @@ public class Move2d : MonoBehaviour
     {
         if(Input.GetButtonDown("Cancel")){
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //Restart Scene
+        }
+    }
+
+    void WallJump(){
+        if(!isGrounded){
+            if(leftWall || rightWall){
+                rb.sharedMaterial = wallFriction;
+            }
+        }
+        else{
+            rb.sharedMaterial = noFriction;
         }
     }
 } 

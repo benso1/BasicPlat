@@ -16,10 +16,12 @@ public class Move2d : MonoBehaviour
     private float dashY = 5f;
     public float dashLength = 0.25f;
     public float dashTimer = 0f;
-    private float jumpTimer = 0f;
+    private float jumpBufferTimer = 0f;
     public float jumpBuffer = 0.2f;
     private float coyoteTimer = 0f;
     public float coyoteBuffer = 0.2f;
+    private float dashBufferTimer = 0f;
+    public float dashBuffer = 0.2f;
     public float horizontalDirection = 0f;
     public float horizontalDamping = 0.2f;
     public float speedCapX = 20f;
@@ -65,13 +67,17 @@ public class Move2d : MonoBehaviour
             speedCapY = speedLimitY;
         }
         horizontalDirection = Input.GetAxisRaw("Horizontal");
-        jumpTimer -= Time.deltaTime;
+        jumpBufferTimer -= Time.deltaTime;
         coyoteTimer -= Time.deltaTime;
+        dashBufferTimer -= Time.deltaTime;
         if(Input.GetButtonDown("Jump")){
-            jumpTimer = jumpBuffer;
+            jumpBufferTimer = jumpBuffer;
         }
         if(isGrounded){
             coyoteTimer = coyoteBuffer;
+        }
+        if(Input.GetButtonDown("Fire3")){
+            dashBufferTimer = dashBuffer;
         }
     }
 
@@ -111,13 +117,14 @@ public class Move2d : MonoBehaviour
         if(isGrounded && !dashActive){
             numDashes = maxDashes; //Resets Dashes
         }
-        if(Input.GetButtonDown("Fire3") && numDashes > 0 && !dashActive){ //Fire3 is Left Shift
+        if(dashBufferTimer > 0 && numDashes > 0 && !dashActive){ //Fire3 is Left Shift
             DashLoc();
             speedCapX = speedLimitX + Mathf.Abs(dashX);
             speedCapY = speedLimitY + Mathf.Abs(dashY);
             numDashes--;
             dashActive = true;
             dashTimer = dashLength;
+            dashBufferTimer = 0;
             float horizontalVelocity = rb.velocity.x;
             float verticalVelocity = rb.velocity.y;
             horizontalVelocity += dashX;
@@ -161,11 +168,11 @@ public class Move2d : MonoBehaviour
         if(coyoteTimer > 0){
             rb.sharedMaterial = noFriction;
             doubleJump = maxJumps;
-            if(jumpTimer > 0){
+            if(jumpBufferTimer > 0){
                 float verticalVelocity = rb.velocity.y;
                 verticalVelocity += jumpHeight;
                 rb.velocity = new Vector2(rb.velocity.x, verticalVelocity);
-                jumpTimer = 0;
+                jumpBufferTimer = 0;
                 coyoteTimer = 0;
             }
         }
@@ -173,7 +180,7 @@ public class Move2d : MonoBehaviour
             if(leftWall || rightWall){
                 rb.sharedMaterial = wallFriction;
             }
-            if(jumpTimer > 0){
+            if(jumpBufferTimer > 0){
                 if(leftWall){
                     float horizontalVelocity = rb.velocity.x;
                     float verticalVelocity = rb.velocity.y;
@@ -194,7 +201,7 @@ public class Move2d : MonoBehaviour
                     verticalVelocity += doubleJumpHeight;
                     rb.velocity = new Vector2(rb.velocity.x, verticalVelocity); //Double Jump
                 }
-                jumpTimer = 0;
+                jumpBufferTimer = 0;
             }
         }
     }

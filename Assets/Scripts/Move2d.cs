@@ -10,12 +10,26 @@ public class Move2d : MonoBehaviour
     public float doubleJumpHeight = 2f;
     public float wallJumpX = 4f;
     public float wallJumpY = 3f;
-    private float dashLengthX = 5f;
-    private float dashLengthY = 5f;
+    public float dashLengthX = 5f;
+    public float dashLengthY = 5f;
     private float dashX = 5f;
     private float dashY = 5f;
     public float dashLength = 0.25f;
     public float dashTimer = 0f;
+    private float jumpTimer = 0f;
+    public float jumpBuffer = 0.2f;
+    private float coyoteTimer = 0f;
+    public float coyoteBuffer = 0.2f;
+    public float horizontalDirection = 0f;
+    public float horizontalDamping = 0.2f;
+    public float speedCapX = 20f;
+    public float speedLimitX = 20f;
+    public float speedCapY = 10f;
+    public float speedLimitY = 20f;
+    public float maxFallSpeed = 20f;
+    private float dampSpeed = 0f;
+    public float veloX = 0f;
+    public float veloY = 0f;
     public int maxDashes = 2;
     public int maxJumps = 1;
     private int numDashes = 2;
@@ -35,6 +49,9 @@ public class Move2d : MonoBehaviour
     //public float dashCooldownTimer = 0f;
     void Start(){
         rb = this.GetComponent<Rigidbody2D>();
+        dampSpeed = 220 / speedCapX;
+        speedCapX = speedLimitX;
+        speedCapY = speedLimitY;
     }
     void Update()
     {
@@ -44,8 +61,18 @@ public class Move2d : MonoBehaviour
         if (dashTimer < 0){
             dashTimer = 0;
             dashActive = false;
+            speedCapX = speedLimitX;
+            speedCapY = speedLimitY;
         }
-        movement = new Vector2(Input.GetAxis("Horizontal"), 0f);
+        horizontalDirection = Input.GetAxisRaw("Horizontal");
+        jumpTimer -= Time.deltaTime;
+        coyoteTimer -= Time.deltaTime;
+        if(Input.GetButtonDown("Jump")){
+            jumpTimer = jumpBuffer;
+        }
+        if(isGrounded){
+            coyoteTimer = coyoteBuffer;
+        }
     }
 
     void FixedUpdate()
@@ -86,15 +113,40 @@ public class Move2d : MonoBehaviour
         }
         if(Input.GetButtonDown("Fire3") && numDashes > 0 && !dashActive){ //Fire3 is Left Shift
             DashLoc();
-            rb.AddForce(dashMovement, ForceMode2D.Impulse);
+            speedCapX = speedLimitX + Mathf.Abs(dashX);
+            speedCapY = speedLimitY + Mathf.Abs(dashY);
             numDashes--;
             dashActive = true;
             dashTimer = dashLength;
-        } 
+            float horizontalVelocity = rb.velocity.x;
+            float verticalVelocity = rb.velocity.y;
+            horizontalVelocity += dashX;
+            verticalVelocity += dashY;
+            rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
+        }
     }
     void MoveCharacter()
     {
-        rb.AddForce(movement * moveSpeed); //Slidy with accelleration
+        float horizontalVelocity = rb.velocity.x;
+        float verticalVelocity = rb.velocity.y;
+        horizontalVelocity += horizontalDirection;
+        horizontalVelocity *= Mathf.Pow(1f - horizontalDamping, Time.deltaTime * dampSpeed);
+        if(horizontalVelocity > speedCapX){
+            horizontalVelocity = speedCapX;
+        }
+        else if(horizontalVelocity < -speedCapX){
+            horizontalVelocity = -speedCapX;
+        }
+        if(verticalVelocity > speedCapY){
+            verticalVelocity = speedCapY;
+        }
+        else if(verticalVelocity < -maxFallSpeed){
+            verticalVelocity = -maxFallSpeed;
+        }
+        rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
+        veloX = rb.velocity.x;
+        veloY = rb.velocity.y;
+        //rb.AddForce(movement * moveSpeed); //Slidy with accelleration
         //rb.velocity = new Vector2(Input.GetAxis("Horizontal") * moveSpeed, rb.velocity.y); //Dash?
     }
 
@@ -106,28 +158,43 @@ public class Move2d : MonoBehaviour
     }
 
     void WallJump(){
-        if(isGrounded){
+        if(coyoteTimer > 0){
             rb.sharedMaterial = noFriction;
             doubleJump = maxJumps;
-            if(Input.GetButtonDown("Jump")){
-                rb.AddForce(new Vector2(0f, jumpHeight), ForceMode2D.Impulse); //Jump
+            if(jumpTimer > 0){
+                float verticalVelocity = rb.velocity.y;
+                verticalVelocity += jumpHeight;
+                rb.velocity = new Vector2(rb.velocity.x, verticalVelocity);
+                jumpTimer = 0;
+                coyoteTimer = 0;
             }
         }
         else{
             if(leftWall || rightWall){
                 rb.sharedMaterial = wallFriction;
             }
-            if(Input.GetButtonDown("Jump")){
+            if(jumpTimer > 0){
                 if(leftWall){
-                    rb.AddForce(new Vector2(wallJumpX, wallJumpY), ForceMode2D.Impulse); //Wall Jump from Left
+                    float horizontalVelocity = rb.velocity.x;
+                    float verticalVelocity = rb.velocity.y;
+                    horizontalVelocity += wallJumpX;
+                    verticalVelocity += wallJumpY;
+                    rb.velocity = new Vector2(horizontalVelocity, verticalVelocity); //Wall Jump from Left
                 }
                 else if(rightWall){
-                    rb.AddForce(new Vector2(-wallJumpX, wallJumpY), ForceMode2D.Impulse); //Wall Jump from Right
+                    float horizontalVelocity = rb.velocity.x;
+                    float verticalVelocity = rb.velocity.y;
+                    horizontalVelocity += -wallJumpX;
+                    verticalVelocity += wallJumpY;
+                    rb.velocity = new Vector2(horizontalVelocity, verticalVelocity); //Wall Jump from Right
                 }
                 else if(doubleJump > 0){
                     doubleJump--;
-                    rb.AddForce(new Vector2(0f, doubleJumpHeight), ForceMode2D.Impulse); //Double Jump
+                    float verticalVelocity = rb.velocity.y;
+                    verticalVelocity += doubleJumpHeight;
+                    rb.velocity = new Vector2(rb.velocity.x, verticalVelocity); //Double Jump
                 }
+                jumpTimer = 0;
             }
         }
     }

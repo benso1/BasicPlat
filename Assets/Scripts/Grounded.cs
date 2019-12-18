@@ -12,10 +12,16 @@ public class Grounded : MonoBehaviour
         if(collision.gameObject.tag == "Ground"){
             Player.GetComponent<Move2d>().SetGrounded(true);
         }
+        if(collision.gameObject.tag == "WallRunWall"){
+            Player.GetComponent<Move2d>().SetWallGrounded(true);
+        }
     }
     private void OnTriggerExit2D(Collider2D collision){
         if(collision.gameObject.tag == "Ground"){
             Player.GetComponent<Move2d>().SetGrounded(false);
+        }
+        if(collision.gameObject.tag == "WallRunWall"){
+            Player.GetComponent<Move2d>().SetWallGrounded(false);
         }
     }
 

@@ -53,7 +53,7 @@ public class Move2d : MonoBehaviour
     private bool isWallJumping = false;
     private bool isDashing = false;
     private bool isSliding = false;
-    private bool isWallRunning = false;
+    public bool isWallRunning = false;
     private bool jumpParticles = false;
     private bool doubleJumpParticles = false;
     private bool wallJumpParticles = false;
@@ -137,7 +137,7 @@ public class Move2d : MonoBehaviour
             dashBufferTimer = dashBuffer;
             isJumping = false;
         }
-        if(Input.GetButtonDown("Fire1")){ //Left Ctrl
+        if(Input.GetButton("Fire1")){ //Left Ctrl
             wallRunBufferTimer = wallRunBuffer;
             isJumping = false;
         }
@@ -242,7 +242,14 @@ public class Move2d : MonoBehaviour
         }
     }
     void WallRun(){ //Run on certain background walls with Left Ctrl
-        
+        if(isWallGrounded && wallRunBufferTimer > 0){
+            UpdateState();
+            isWallRunning = true;
+            wallRunBufferTimer = 0;
+            if(rb.velocity.y < 0){
+                SetYVelocity(0, 0);
+            }
+        }
     }
     void CapSpeeds(){ //Prevent player from moving too fast
         float horizontalVelocity = rb.velocity.x;

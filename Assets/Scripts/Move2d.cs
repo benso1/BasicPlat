@@ -34,6 +34,7 @@ public class Move2d : MonoBehaviour
     private float dampSpeed = 0f;
     private int numDashes = 1;
     private int doubleJump = 1;
+    public float stopSpeed = 5f;
     public float testVeloX = 0f;
     public float testVeloY = 0f;
     private bool isGrounded = false;
@@ -192,7 +193,15 @@ public class Move2d : MonoBehaviour
         }
     }
     void Run(){ //Adjust horizontal speed based on Arrow Keys
-        AddVelocity(horizontalInput, 0);
+        if(rb.velocity.x < stopSpeed && rb.velocity.x > 0 && horizontalInput <= 0){
+            SetVelocity(0, rb.velocity.y);
+        }
+        else if(rb.velocity.x > -stopSpeed && rb.velocity.x < 0 && horizontalInput >= 0){
+            SetVelocity(0, rb.velocity.y);
+        }
+        else{
+            AddVelocity(horizontalInput, 0);
+        }
     }
     void CapSpeeds(){ //Prevent player from moving too fast
         float horizontalVelocity = rb.velocity.x;

@@ -25,6 +25,8 @@ public class Move2d : MonoBehaviour
     public float coyoteBuffer = 0.2f;
     private float dashBufferTimer = 0f;
     public float dashBuffer = 0.2f;
+    private float wallRunBufferTimer = 0f;
+    public float wallRunBuffer = 0.2f;
     private float horizontalInput = 0f;
     private float verticalInput = 0f;
     public float horizontalDamping = 0.2f;
@@ -43,6 +45,7 @@ public class Move2d : MonoBehaviour
     public float testVeloX = 0f;
     public float testVeloY = 0f;
     private bool isGrounded = false;
+    private bool isWallGrounded = false;
     private bool leftWall = false;
     private bool rightWall = false;
     private bool isJumping = false;
@@ -97,6 +100,7 @@ public class Move2d : MonoBehaviour
         jumpBufferTimer -= Time.deltaTime;
         coyoteTimer -= Time.deltaTime;
         dashBufferTimer -= Time.deltaTime;
+        wallRunBufferTimer -= Time.deltaTime;
         
         if(particleTimer >= 0){
             particleTimer -= Time.deltaTime;
@@ -122,16 +126,25 @@ public class Move2d : MonoBehaviour
         }
     }
     void SetTimers(){ //Sets timers based on Inputs
-        if(Input.GetButtonDown("Jump")){
+        if(Input.GetButtonDown("Jump")){ //Space
             jumpBufferTimer = jumpBuffer;
         }
         if(isGrounded){
             coyoteTimer = coyoteBuffer;
             isJumping = false;
         }
-        if(Input.GetButtonDown("Fire3")){
+        if(Input.GetButtonDown("Fire3")){ //Left Shift
             dashBufferTimer = dashBuffer;
             isJumping = false;
+        }
+        if(Input.GetButtonDown("Fire1")){ //Left Ctrl
+            wallRunBufferTimer = wallRunBuffer;
+            isJumping = false;
+        }
+    }
+    void Reset(){//Restart Level on Escape Key
+        if(Input.GetButtonDown("Cancel")){
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //Restart Scene
         }
     }
     void FixedUpdate(){ //Operates every physics step, could be multiple times per frame
@@ -139,8 +152,117 @@ public class Move2d : MonoBehaviour
         Dash();
         Slide();
         WallJump();
+        WallRun();
         CapSpeeds();
         DisplayParticles();
+    }
+    void UpdateState(){ //Lets us figure out which state we are in for animation/particle effects
+        isJumping = false;
+        isDoubleJumping = false;
+        isWallJumping = false;
+        isDashing = false;
+        isSliding = false;
+        isWallRunning = false;
+    }
+    void Run(){ //Adjust horizontal speed based on Arrow Keys
+        if(rb.velocity.x < stopSpeed && rb.velocity.x > 0 && horizontalInput <= 0){
+            SetVelocity(0, rb.velocity.y);
+        }
+        else if(rb.velocity.x > -stopSpeed && rb.velocity.x < 0 && horizontalInput >= 0){
+            SetVelocity(0, rb.velocity.y);
+        }
+        else{
+            AddVelocity(horizontalInput, 0);
+        }
+    }
+    void Dash(){ //Lets player dash on Left Shift
+        if(isGrounded && dashTimer < 0){ //Resets Dashes on ground
+            numDashes = maxDashes; 
+        }
+        if(dashBufferTimer > 0 && numDashes > 0 && dashTimer < 0){ 
+            SetDashDirection();
+            speedCapX = speedLimitX + Mathf.Abs(dashX);
+            //speedCapY = speedLimitY + Mathf.Abs(dashY);
+            numDashes--;
+            dashTimer = dashActiveTime;
+            dashBufferTimer = 0;
+            UpdateState();
+            isDashing = true;
+            SetDashVelocity();
+        }
+    }
+    void Slide(){ //Slide when you dash into the ground
+        if(isDashing && dashY < 0 && isGrounded){
+            UpdateState();
+            isSliding = true;
+            speedCapX = speedLimitX + Mathf.Abs(slideLength);
+            float slideDirection = slideLength;
+            if(dashX < 0){
+                slideDirection = -slideLength;
+            }
+            AddVelocity(slideDirection, 0);
+            slideTimer = slideActiveTime;
+            player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
+        }
+    }
+    void WallJump(){ //Jump with Space, Double Jump while in air, Wall Jump when on wall
+        if(coyoteTimer > 0){
+            doubleJump = extraJumps;
+            if(jumpBufferTimer > 0){
+                SetYVelocity(0, jumpHeight); //Jump
+                jumpBufferTimer = 0;
+                coyoteTimer = 0;
+                UpdateState();
+                isJumping = true;
+                shortHopTimer = shortHopTime;
+            }
+        }
+        else{
+            if(jumpBufferTimer > 0){
+                if(leftWall){
+                    UpdateState();
+                    isWallJumping = true;
+                    SetYVelocity(wallJumpX, wallJumpY); //Wall Jump from Left
+                    jumpBufferTimer = 0;
+                }
+                else if(rightWall){
+                    UpdateState();
+                    isWallJumping = true;
+                    SetYVelocity(-wallJumpX, wallJumpY); //Wall Jump from Right
+                    jumpBufferTimer = 0;
+                }
+                else if(doubleJump > 0){
+                    doubleJump--;
+                    UpdateState();
+                    isDoubleJumping = true;
+                    SetYVelocity(0, doubleJumpHeight); //Double Jump
+                    jumpBufferTimer = 0;
+                }
+            }
+        }
+    }
+    void WallRun(){ //Run on certain background walls with Left Ctrl
+        
+    }
+    void CapSpeeds(){ //Prevent player from moving too fast
+        float horizontalVelocity = rb.velocity.x;
+        float verticalVelocity = rb.velocity.y;
+        horizontalVelocity *= Mathf.Pow(1f - horizontalDamping, Time.deltaTime * dampSpeed);
+        if(horizontalVelocity > speedCapX){
+            horizontalVelocity = speedCapX;
+        }
+        else if(horizontalVelocity < -speedCapX){
+            horizontalVelocity = -speedCapX;
+        }
+        if(verticalVelocity > speedCapY){
+            verticalVelocity = speedCapY;
+        }
+        else if(verticalVelocity < -maxFallSpeed){
+            verticalVelocity = -maxFallSpeed;
+        }
+        rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
+        testVeloX = rb.velocity.x;
+        testVeloY = rb.velocity.y;
     }
     void DisplayParticles(){ //Runs particle effects until animations are added
         if(isJumping && !jumpParticles){
@@ -202,30 +324,6 @@ public class Move2d : MonoBehaviour
         UpdateState();
         ps.Stop();
     }
-    void UpdateState(){ //Lets us figure out which state we are in for animation/particle effects
-        isJumping = false;
-        isDoubleJumping = false;
-        isWallJumping = false;
-        isDashing = false;
-        isSliding = false;
-        isWallRunning = false;
-    }
-    void Dash(){ //Lets player dash on Left Shift
-        if(isGrounded && dashTimer < 0){ //Resets Dashes on ground
-            numDashes = maxDashes; 
-        }
-        if(dashBufferTimer > 0 && numDashes > 0 && dashTimer < 0){ 
-            SetDashDirection();
-            speedCapX = speedLimitX + Mathf.Abs(dashX);
-            //speedCapY = speedLimitY + Mathf.Abs(dashY);
-            numDashes--;
-            dashTimer = dashActiveTime;
-            dashBufferTimer = 0;
-            UpdateState();
-            isDashing = true;
-            SetDashVelocity();
-        }
-    }
     void SetDashDirection(){ //DashLengthX/Y is the length of the dash, DashX/Y is the vector you will dash at
         if(horizontalInput > 0){ 
             dashX = dashLengthX;
@@ -276,92 +374,6 @@ public class Move2d : MonoBehaviour
         }
         rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
     }
-    void WallJump(){ //Jump with Space, Double Jump while in air, Wall Jump when on wall
-        if(coyoteTimer > 0){
-            doubleJump = extraJumps;
-            if(jumpBufferTimer > 0){
-                SetYVelocity(0, jumpHeight); //Jump
-                jumpBufferTimer = 0;
-                coyoteTimer = 0;
-                UpdateState();
-                isJumping = true;
-                shortHopTimer = shortHopTime;
-            }
-        }
-        else{
-            if(jumpBufferTimer > 0){
-                if(leftWall){
-                    UpdateState();
-                    isWallJumping = true;
-                    SetYVelocity(wallJumpX, wallJumpY); //Wall Jump from Left
-                    jumpBufferTimer = 0;
-                }
-                else if(rightWall){
-                    UpdateState();
-                    isWallJumping = true;
-                    SetYVelocity(-wallJumpX, wallJumpY); //Wall Jump from Right
-                    jumpBufferTimer = 0;
-                }
-                else if(doubleJump > 0){
-                    doubleJump--;
-                    UpdateState();
-                    isDoubleJumping = true;
-                    SetYVelocity(0, doubleJumpHeight); //Double Jump
-                    jumpBufferTimer = 0;
-                }
-            }
-        }
-    }
-    void Run(){ //Adjust horizontal speed based on Arrow Keys
-        if(rb.velocity.x < stopSpeed && rb.velocity.x > 0 && horizontalInput <= 0){
-            SetVelocity(0, rb.velocity.y);
-        }
-        else if(rb.velocity.x > -stopSpeed && rb.velocity.x < 0 && horizontalInput >= 0){
-            SetVelocity(0, rb.velocity.y);
-        }
-        else{
-            AddVelocity(horizontalInput, 0);
-        }
-    }
-    void CapSpeeds(){ //Prevent player from moving too fast
-        float horizontalVelocity = rb.velocity.x;
-        float verticalVelocity = rb.velocity.y;
-        horizontalVelocity *= Mathf.Pow(1f - horizontalDamping, Time.deltaTime * dampSpeed);
-        if(horizontalVelocity > speedCapX){
-            horizontalVelocity = speedCapX;
-        }
-        else if(horizontalVelocity < -speedCapX){
-            horizontalVelocity = -speedCapX;
-        }
-        if(verticalVelocity > speedCapY){
-            verticalVelocity = speedCapY;
-        }
-        else if(verticalVelocity < -maxFallSpeed){
-            verticalVelocity = -maxFallSpeed;
-        }
-        rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
-        testVeloX = rb.velocity.x;
-        testVeloY = rb.velocity.y;
-    }
-    void Slide(){
-        if(isDashing && dashY < 0 && isGrounded){
-            UpdateState();
-            isSliding = true;
-            speedCapX = speedLimitX + Mathf.Abs(slideLength);
-            float slideDirection = slideLength;
-            if(dashX < 0){
-                slideDirection = -slideLength;
-            }
-            AddVelocity(slideDirection, 0);
-            slideTimer = slideActiveTime;
-            player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
-        }
-    }
-    void Reset(){//Restart Level on Escape Key
-        if(Input.GetButtonDown("Cancel")){
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //Restart Scene
-        }
-    }
     void AddVelocity(float speedX, float speedY){ //Add speed with velocity function
         float horizontalVelocity = rb.velocity.x;
         float verticalVelocity = rb.velocity.y;
@@ -385,5 +397,8 @@ public class Move2d : MonoBehaviour
     }
     public void SetGrounded(bool exists){ //Setter for isGrounded
         isGrounded = exists;
+    }
+    public void SetWallGrounded(bool exists){ //Setter for isGrounded
+        isWallGrounded = exists;
     }
 }

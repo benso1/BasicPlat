@@ -40,8 +40,6 @@ public class Move2d : MonoBehaviour
     private bool leftWall = false;
     private bool rightWall = false;
     public Rigidbody2D rb;
-    public PhysicsMaterial2D wallFriction;
-    public PhysicsMaterial2D noFriction;
     void Start(){ //Initializes variables
         dampSpeed = 220 / speedCapX;
         speedCapX = speedLimitX;
@@ -52,6 +50,13 @@ public class Move2d : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
         DecrementTimers();
         SetTimers();
+        Reset();
+    }
+    void FixedUpdate(){ //Operates every physics step, could be multiple times per frame
+        Run();
+        Dash();
+        WallJump();
+        CapSpeeds();
     }
     void DecrementTimers(){ //Lowers the time on all timers
         jumpBufferTimer -= Time.deltaTime;
@@ -74,13 +79,6 @@ public class Move2d : MonoBehaviour
             dashBufferTimer = dashBuffer;
         }
     }
-    void FixedUpdate(){ //Operates every physics step, could be multiple times per frame
-        Run();
-        Dash();
-        WallJump();
-        CapSpeeds();
-        Reset();
-    }
     void Dash(){ //Lets player dash on Left Shift
         if(isGrounded && dashTimer < 0){ //Resets Dashes on ground
             numDashes = maxDashes; 
@@ -92,7 +90,7 @@ public class Move2d : MonoBehaviour
             numDashes--;
             dashTimer = dashActiveTime;
             dashBufferTimer = 0;
-            AddVelocity(dashX, dashY);
+            SetDashVelocity();
         }
     }
     void SetDashDirection(){ //DashLengthX/Y is the length of the dash, DashX/Y is the vector you will dash at
@@ -118,6 +116,33 @@ public class Move2d : MonoBehaviour
             dashX = dashLengthX;
         } //8 Direction Dash Setup
     }
+    void SetDashVelocity(){
+        float horizontalVelocity = rb.velocity.x;
+        float verticalVelocity = rb.velocity.y;
+        horizontalVelocity += dashX;
+        verticalVelocity += dashY;
+        if(dashX > 0){
+            if(horizontalVelocity < dashX){
+                horizontalVelocity = dashX;
+            }
+        }
+        else if(dashX < 0){
+            if(horizontalVelocity > -dashX){
+                horizontalVelocity = -dashX;
+            }
+        }
+        if(dashY > 0){
+            if(verticalVelocity < dashY){
+                verticalVelocity = dashY;
+            }
+        }
+        else if(dashY < 0){
+            if(verticalVelocity > -dashY){
+                verticalVelocity = -dashY;
+            }
+        }
+        rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
+    }
     void AddVelocity(float speedX, float speedY){ //Add speed with velocity function
         float horizontalVelocity = rb.velocity.x;
         float verticalVelocity = rb.velocity.y;
@@ -125,30 +150,34 @@ public class Move2d : MonoBehaviour
         verticalVelocity += speedY;
         rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
     }
+    void SetYVelocity(float speedX, float speedY){ //Add Speed to X, and set Y
+        float horizontalVelocity = rb.velocity.x;
+        horizontalVelocity += speedX;
+        rb.velocity = new Vector2(horizontalVelocity, speedY);
+    }
+    void SetVelocity(float speedX, float speedY){ //Set both X and Y velocity
+        rb.velocity = new Vector2(speedX, speedY);
+    }
     void WallJump(){ //Jump with Space, Double Jump while in air, Wall Jump when on wall
         if(coyoteTimer > 0){
-            rb.sharedMaterial = noFriction;
             doubleJump = extraJumps;
             if(jumpBufferTimer > 0){
-                AddVelocity(0, jumpHeight); //Jump
+                SetYVelocity(0, jumpHeight); //Jump
                 jumpBufferTimer = 0;
                 coyoteTimer = 0;
             }
         }
         else{
-            if(leftWall || rightWall){
-                rb.sharedMaterial = wallFriction; //Add Wall Friction
-            }
             if(jumpBufferTimer > 0){
                 if(leftWall){
-                    AddVelocity(wallJumpX, wallJumpY); //Wall Jump from Left
+                    SetYVelocity(wallJumpX, wallJumpY); //Wall Jump from Left
                 }
                 else if(rightWall){
-                    AddVelocity(-wallJumpX, wallJumpY); //Wall Jump from Right
+                    SetYVelocity(-wallJumpX, wallJumpY); //Wall Jump from Right
                 }
                 else if(doubleJump > 0){
                     doubleJump--;
-                    AddVelocity(0, doubleJumpHeight); //Double Jump
+                    SetYVelocity(0, doubleJumpHeight); //Double Jump
                 }
                 jumpBufferTimer = 0;
             }
@@ -182,13 +211,13 @@ public class Move2d : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //Restart Scene
         }
     }
-    public void SetLeftWall(bool exists){
+    public void SetLeftWall(bool exists){ //Setter for leftWall
         leftWall = exists;
     }
-    public void SetRightWall(bool exists){
+    public void SetRightWall(bool exists){ //Setter for rightWall
         rightWall = exists;
     }
-    public void SetGrounded(bool exists){
+    public void SetGrounded(bool exists){ //Setter for isGrounded
         isGrounded = exists;
     }
 }

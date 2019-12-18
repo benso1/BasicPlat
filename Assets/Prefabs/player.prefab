@@ -4997,6 +4997,7 @@ MonoBehaviour:
   jumpBuffer: 0.1
   coyoteBuffer: 0.1
   dashBuffer: 0.2
+  wallRunBuffer: 0.2
   horizontalDamping: 0.2
   speedLimitX: 20
   speedLimitY: 10
@@ -5006,14 +5007,15 @@ MonoBehaviour:
   slideLength: 5
   testVeloX: 0
   testVeloY: 0
+  isWallRunning: 0
   particleJumpLength: 0.5
   particleDoubleJumpLength: 0.5
   particleWallJumpLength: 0.45
   particleDashLength: 0.45
   particleSlideLength: 0.45
+  wallRunLength: 0.75
   rb: {fileID: 7628640688249597258}
   ps: {fileID: 1924632394}
-  slideColor: {r: 1, g: 0.6137143, b: 0, a: 1}
   player: {fileID: 7628640688249597256}
 --- !u!1 &8111869218394675996
 GameObject:

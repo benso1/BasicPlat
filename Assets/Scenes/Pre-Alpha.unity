@@ -5718,7 +5718,6 @@ GameObject:
   - component: {fileID: 1863244485}
   - component: {fileID: 1863244488}
   - component: {fileID: 1863244489}
-  - component: {fileID: 1863244487}
   m_Layer: 0
   m_Name: WallRun
   m_TagString: WallRunWall
@@ -7186,53 +7185,6 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!66 &1863244487
-CompositeCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1863244483}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_GeometryType: 0
-  m_GenerationType: 0
-  m_EdgeRadius: 0
-  m_ColliderPaths:
-  - m_Collider: {fileID: 1863244489}
-    m_ColliderPaths:
-    - - X: 415000000
-        Y: -35000000
-      - X: 355000000
-        Y: -35000000
-      - X: 355000000
-        Y: -45000000
-      - X: 415000000
-        Y: -45000000
-    - - X: 800000000
-        Y: -35000000
-      - X: 500000000
-        Y: -35000000
-      - X: 500000000
-        Y: -45000000
-      - X: 800000000
-        Y: -45000000
-  m_CompositePaths:
-    m_Paths:
-    - - {x: 41.5, y: -3.5}
-      - {x: 35.5, y: -3.5}
-      - {x: 35.5, y: -4.5}
-      - {x: 41.5, y: -4.5}
-    - - {x: 80, y: -3.5}
-      - {x: 50, y: -3.5}
-      - {x: 50, y: -4.5}
-      - {x: 80, y: -4.5}
-  m_VertexDistance: 0.0005
 --- !u!50 &1863244488
 Rigidbody2D:
   serializedVersion: 4
@@ -7264,9 +7216,9 @@ TilemapCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
-  m_UsedByComposite: 1
+  m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
 --- !u!1001 &7628640689618551268
 PrefabInstance:
@@ -7329,21 +7281,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
-        type: 3}
-      propertyPath: slideColor.r
-      value: 0.75
-      objectReference: {fileID: 0}
-    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
-        type: 3}
-      propertyPath: slideColor.g
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
-        type: 3}
-      propertyPath: slideColor.b
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597261, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}

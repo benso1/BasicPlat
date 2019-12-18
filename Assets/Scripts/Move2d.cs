@@ -5,74 +5,85 @@ using UnityEngine.SceneManagement;
 
 public class Move2d : MonoBehaviour
 {
+//Jump
     public float jumpHeight = 5f;
+//Double Jump
     public float doubleJumpHeight = 2f;
-    public int extraJumps = 1;
+    private int extraJumps = 1;
+    private int doubleJump = 1;
+//Wall Jump
     public float wallJumpX = 4f;
     public float wallJumpY = 3f;
+//Dash
     public float dashLengthX = 5f;
     private float dashX = 5f;
     public float dashLengthY = 5f;
     private float dashY = 5f;
-    public int maxDashes = 1;
+    private int maxDashes = 1;
+    private int numDashes = 1;
+//Slide
+    public float slideLength = 5f;
+//Timers
     private float dashTimer = 0f;
     public float dashActiveTime = 0.25f;
     private float slideTimer = 0f;
     public float slideActiveTime = 0.25f;
+    private float shortHopTime = 0.2f;
+    private float shortHopTimer = 0f;
+//Buffers
     private float jumpBufferTimer = 0f;
     public float jumpBuffer = 0.2f;
-    private float coyoteTimer = 0f;
+    private float coyoteBufferTimer = 0f;
     public float coyoteBuffer = 0.2f;
     private float dashBufferTimer = 0f;
     public float dashBuffer = 0.2f;
     private float wallRunBufferTimer = 0f;
     public float wallRunBuffer = 0.2f;
+//Speed and Velocity
     private float horizontalInput = 0f;
     private float verticalInput = 0f;
+    public float stopSpeed = 5f;
     public float horizontalDamping = 0.2f;
+    private float dampSpeed = 0f;
     private float speedCapX = 20f;
     public float speedLimitX = 20f;
     private float speedCapY = 10f;
     public float speedLimitY = 10f;
     public float maxFallSpeed = 20f;
-    private float dampSpeed = 0f;
-    private int numDashes = 1;
-    private int doubleJump = 1;
-    public float shortHopTime = 0.2f;
-    private float shortHopTimer = 0f;
-    public float stopSpeed = 5f;
-    public float slideLength = 5f;
     public float testVeloX = 0f;
     public float testVeloY = 0f;
-    private bool isGrounded = false;
-    private bool isWallGrounded = false;
+//States
     private bool leftWall = false;
     private bool rightWall = false;
+    private bool isGrounded = false;
+    private bool isWallGrounded = false;
     private bool isJumping = false;
     private bool isDoubleJumping = false;
     private bool isWallJumping = false;
     private bool isDashing = false;
     private bool isSliding = false;
-    public bool isWallRunning = false;
+    private bool isWallRunning = false;
+//Particle Effects
     private bool jumpParticles = false;
     private bool doubleJumpParticles = false;
     private bool wallJumpParticles = false;
     private bool wallRunParticles = false;
     private bool dashParticles = false;
     private bool slideParticles = false;
-    public float particleJumpLength = 0.75f;
-    public float particleDoubleJumpLength = 0.75f;
-    public float particleWallJumpLength = 0.75f;
-    public float particleDashLength = 0.75f;
-    public float particleSlideLength = 0.75f;
+    private float particleJumpLength = 0.75f;
+    private float particleDoubleJumpLength = 0.75f;
+    private float particleWallJumpLength = 0.75f;
+    private float particleDashLength = 0.75f;
+    private float particleSlideLength = 0.75f;
+    private float particleWallRunLength = 0.75f;
     private float particleTimer = 0f;
-    public float wallRunLength = 0.75f;
-    private float wallRunTimer = 0f;
+//Stored Objects
+    private float playerScaleY;
+    public Transform player;
     public Rigidbody2D rb;
     public ParticleSystem ps;
     public ParticleSystem.MainModule main;
-    public Transform player;
-    private float playerScaleY;
+//Functions
     void Start(){ //Initializes variables
         dampSpeed = 220 / speedCapX;
         speedCapX = speedLimitX;
@@ -98,7 +109,7 @@ public class Move2d : MonoBehaviour
     }
     void DecrementTimers(){ //Lowers the time on all timers
         jumpBufferTimer -= Time.deltaTime;
-        coyoteTimer -= Time.deltaTime;
+        coyoteBufferTimer -= Time.deltaTime;
         dashBufferTimer -= Time.deltaTime;
         wallRunBufferTimer -= Time.deltaTime;
         
@@ -130,7 +141,7 @@ public class Move2d : MonoBehaviour
             jumpBufferTimer = jumpBuffer;
         }
         if(isGrounded){
-            coyoteTimer = coyoteBuffer;
+            coyoteBufferTimer = coyoteBuffer;
             isJumping = false;
         }
         if(Input.GetButtonDown("Fire3")){ //Left Shift
@@ -206,12 +217,12 @@ public class Move2d : MonoBehaviour
         }
     }
     void WallJump(){ //Jump with Space, Double Jump while in air, Wall Jump when on wall
-        if(coyoteTimer > 0){
+        if(coyoteBufferTimer > 0){
             doubleJump = extraJumps;
             if(jumpBufferTimer > 0){
                 SetYVelocity(0, jumpHeight); //Jump
                 jumpBufferTimer = 0;
-                coyoteTimer = 0;
+                coyoteBufferTimer = 0;
                 UpdateState();
                 isJumping = true;
                 shortHopTimer = shortHopTime;
@@ -316,7 +327,7 @@ public class Move2d : MonoBehaviour
             UpdateParticles();
             isWallRunning = true;
             main.startColor = new Color(0.75f, 0f, 1f, 1f);
-            particleTimer = wallRunLength;
+            particleTimer = particleWallRunLength;
             wallRunParticles = true;
             ps.Play();
         }

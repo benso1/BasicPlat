@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1924632391}
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.009000037, y: 0.063, z: -0.017}
+  m_LocalPosition: {x: -0.012, y: -0.063, z: -0.017}
   m_LocalScale: {x: 0.5555556, y: 0.5555558, z: 0.5555558}
   m_Children: []
   m_Father: {fileID: 7628640688249597256}
@@ -40,7 +40,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1924632391}
   serializedVersion: 6
-  lengthInSec: 3
+  lengthInSec: 0.75
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -115,7 +115,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.3
+      scalar: 0.1
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -659,7 +659,7 @@ ParticleSystem:
   ShapeModule:
     serializedVersion: 6
     enabled: 1
-    type: 4
+    type: 0
     angle: 25
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
@@ -746,7 +746,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.2
+      value: 0.5
       mode: 0
       spread: 0
       speed:
@@ -1360,7 +1360,7 @@ ParticleSystem:
         m_NumColorKeys: 2
         m_NumAlphaKeys: 2
   UVModule:
-    enabled: 1
+    enabled: 0
     mode: 1
     timeMode: 0
     fps: 30
@@ -4654,7 +4654,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10301, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -4674,7 +4674,7 @@ ParticleSystemRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_RenderMode: 0
   m_SortMode: 0
   m_MinParticleSize: 0
@@ -4993,7 +4993,8 @@ MonoBehaviour:
   dashLengthY: 5
   maxDashes: 1
   dashActiveTime: 0.25
-  jumpBuffer: 0.2
+  slideActiveTime: 0.25
+  jumpBuffer: 0.1
   coyoteBuffer: 0.1
   dashBuffer: 0.2
   horizontalDamping: 0.2
@@ -5002,11 +5003,18 @@ MonoBehaviour:
   maxFallSpeed: 20
   shortHopTime: 0.1
   stopSpeed: 2
+  slideLength: 5
   testVeloX: 0
   testVeloY: 0
-  isJumping: 0
+  particleJumpLength: 0.5
+  particleDoubleJumpLength: 0.5
+  particleWallJumpLength: 0.45
+  particleDashLength: 0.45
+  particleSlideLength: 0.45
   rb: {fileID: 7628640688249597258}
   ps: {fileID: 1924632394}
+  slideColor: {r: 1, g: 0.6137143, b: 0, a: 1}
+  player: {fileID: 7628640688249597256}
 --- !u!1 &8111869218394675996
 GameObject:
   m_ObjectHideFlags: 0

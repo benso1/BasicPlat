@@ -17,6 +17,8 @@ public class Move2d : MonoBehaviour
     public int maxDashes = 1;
     private float dashTimer = 0f;
     public float dashActiveTime = 0.25f;
+    private float slideTimer = 0f;
+    public float slideActiveTime = 0.25f;
     private float jumpBufferTimer = 0f;
     public float jumpBuffer = 0.2f;
     private float coyoteTimer = 0f;
@@ -37,6 +39,7 @@ public class Move2d : MonoBehaviour
     public float shortHopTime = 0.2f;
     private float shortHopTimer = 0f;
     public float stopSpeed = 5f;
+    public float slideLength = 5f;
     public float testVeloX = 0f;
     public float testVeloY = 0f;
     private bool isGrounded = false;
@@ -46,24 +49,34 @@ public class Move2d : MonoBehaviour
     private bool isDoubleJumping = false;
     private bool isWallJumping = false;
     private bool isDashing = false;
+    private bool isSliding = false;
+    private bool isWallRunning = false;
     private bool jumpParticles = false;
     private bool doubleJumpParticles = false;
     private bool wallJumpParticles = false;
+    private bool wallRunParticles = false;
     private bool dashParticles = false;
+    private bool slideParticles = false;
     public float particleJumpLength = 0.75f;
     public float particleDoubleJumpLength = 0.75f;
     public float particleWallJumpLength = 0.75f;
     public float particleDashLength = 0.75f;
+    public float particleSlideLength = 0.75f;
     private float particleTimer = 0f;
+    public float wallRunLength = 0.75f;
+    private float wallRunTimer = 0f;
     public Rigidbody2D rb;
     public ParticleSystem ps;
     public ParticleSystem.MainModule main;
+    public Transform player;
+    private float playerScaleY;
     void Start(){ //Initializes variables
         dampSpeed = 220 / speedCapX;
         speedCapX = speedLimitX;
         speedCapY = speedLimitY;
         main = ps.main;
         SetGravity();
+        playerScaleY = player.localScale.y;
         ps.Stop();
     }
     void SetGravity(){ //Set y-velocities to scale with gravity
@@ -79,51 +92,6 @@ public class Move2d : MonoBehaviour
         DecrementTimers();
         SetTimers();
         Reset();
-    }
-    void FixedUpdate(){ //Operates every physics step, could be multiple times per frame
-        Run();
-        Dash();
-        WallJump();
-        CapSpeeds();
-        Particles();
-    }
-    void Particles(){ //Runs particle effects until animations are added
-        if(isJumping && !jumpParticles){
-            UpdateParticles();
-            main.startColor = new Color(0f, 0f, 0f, 1f);
-            particleTimer = particleJumpLength;
-            jumpParticles = true;
-            ps.Play();
-        }
-        if(isDoubleJumping && !doubleJumpParticles){
-            UpdateParticles();
-            main.startColor = Color.blue;
-            particleTimer = particleDoubleJumpLength;
-            doubleJumpParticles = true;
-            ps.Play();
-        }
-        if(isDashing && !dashParticles){
-            UpdateParticles();
-            main.startColor = Color.magenta;
-            particleTimer = particleDashLength;
-            dashParticles = true;
-            ps.Play();
-        }
-        if(isWallJumping && !wallJumpParticles){
-            UpdateParticles();
-            main.startColor = Color.red;
-            particleTimer = particleWallJumpLength;
-            wallJumpParticles = true;
-            ps.Play();
-        }
-    }
-    void UpdateParticles(){ //Lets us know which particles are running so we don't disable them
-        wallJumpParticles = false;
-        dashParticles = false;
-        jumpParticles = false;
-        doubleJumpParticles = false;
-        UpdateState();
-        ps.Stop();
     }
     void DecrementTimers(){ //Lowers the time on all timers
         jumpBufferTimer -= Time.deltaTime;
@@ -145,6 +113,13 @@ public class Move2d : MonoBehaviour
             speedCapX = speedLimitX;
             speedCapY = speedLimitY;
         }
+        if(slideTimer >= 0){
+            slideTimer -= Time.deltaTime;
+        }
+        if (slideTimer < 0){
+            slideTimer = -1f;
+            player.localScale = new Vector3(player.localScale.x, playerScaleY, player.localScale.z);
+        }
     }
     void SetTimers(){ //Sets timers based on Inputs
         if(Input.GetButtonDown("Jump")){
@@ -158,6 +133,82 @@ public class Move2d : MonoBehaviour
             dashBufferTimer = dashBuffer;
             isJumping = false;
         }
+    }
+    void FixedUpdate(){ //Operates every physics step, could be multiple times per frame
+        Run();
+        Dash();
+        Slide();
+        WallJump();
+        CapSpeeds();
+        DisplayParticles();
+    }
+    void DisplayParticles(){ //Runs particle effects until animations are added
+        if(isJumping && !jumpParticles){
+            UpdateParticles();
+            isJumping = true;
+            main.startColor = new Color(0f, 0f, 0f, 1f);
+            particleTimer = particleJumpLength;
+            jumpParticles = true;
+            ps.Play();
+        }
+        if(isDoubleJumping && !doubleJumpParticles){
+            UpdateParticles();
+            isDoubleJumping = true;
+            main.startColor = Color.blue;
+            particleTimer = particleDoubleJumpLength;
+            doubleJumpParticles = true;
+            ps.Play();
+        }
+        if(isDashing && !dashParticles){
+            UpdateParticles();
+            isDashing = true;
+            main.startColor = Color.magenta;
+            particleTimer = particleDashLength;
+            dashParticles = true;
+            ps.Play();
+        }
+        if(isWallJumping && !wallJumpParticles){
+            UpdateParticles();
+            isWallJumping = true;
+            main.startColor = Color.red;
+            particleTimer = particleWallJumpLength;
+            wallJumpParticles = true;
+            ps.Play();
+        }
+        if(isSliding && !slideParticles){
+            UpdateParticles();
+            isSliding = true;
+            main.startColor = new Color(1f, 0.637f, 0f, 1f);
+            particleTimer = particleSlideLength;
+            slideParticles = true;
+            ps.Play();
+        }
+        if(isWallRunning && !wallRunParticles){
+            UpdateParticles();
+            isWallRunning = true;
+            main.startColor = new Color(0.75f, 0f, 1f, 1f);
+            particleTimer = wallRunLength;
+            wallRunParticles = true;
+            ps.Play();
+        }
+    }
+    void UpdateParticles(){ //Lets us know which particles are running so we don't disable them
+        wallJumpParticles = false;
+        dashParticles = false;
+        jumpParticles = false;
+        doubleJumpParticles = false;
+        slideParticles = false;
+        wallRunParticles = false;
+        UpdateState();
+        ps.Stop();
+    }
+    void UpdateState(){ //Lets us figure out which state we are in for animation/particle effects
+        isJumping = false;
+        isDoubleJumping = false;
+        isWallJumping = false;
+        isDashing = false;
+        isSliding = false;
+        isWallRunning = false;
     }
     void Dash(){ //Lets player dash on Left Shift
         if(isGrounded && dashTimer < 0){ //Resets Dashes on ground
@@ -224,27 +275,6 @@ public class Move2d : MonoBehaviour
             }
         }
         rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
-    }
-    void AddVelocity(float speedX, float speedY){ //Add speed with velocity function
-        float horizontalVelocity = rb.velocity.x;
-        float verticalVelocity = rb.velocity.y;
-        horizontalVelocity += speedX;
-        verticalVelocity += speedY;
-        rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
-    }
-    void SetYVelocity(float speedX, float speedY){ //Add Speed to X, and set Y
-        float horizontalVelocity = rb.velocity.x;
-        horizontalVelocity += speedX;
-        rb.velocity = new Vector2(horizontalVelocity, speedY);
-    }
-    void SetVelocity(float speedX, float speedY){ //Set both X and Y velocity
-        rb.velocity = new Vector2(speedX, speedY);
-    }
-    void UpdateState(){ //Lets us figure out which state we are in for animation/particle effects
-        isJumping = false;
-        isDoubleJumping = false;
-        isWallJumping = false;
-        isDashing = false;
     }
     void WallJump(){ //Jump with Space, Double Jump while in air, Wall Jump when on wall
         if(coyoteTimer > 0){
@@ -313,10 +343,39 @@ public class Move2d : MonoBehaviour
         testVeloX = rb.velocity.x;
         testVeloY = rb.velocity.y;
     }
+    void Slide(){
+        if(isDashing && dashY < 0 && isGrounded){
+            UpdateState();
+            isSliding = true;
+            speedCapX = speedLimitX + Mathf.Abs(slideLength);
+            float slideDirection = slideLength;
+            if(dashX < 0){
+                slideDirection = -slideLength;
+            }
+            AddVelocity(slideDirection, 0);
+            slideTimer = slideActiveTime;
+            player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
+        }
+    }
     void Reset(){//Restart Level on Escape Key
         if(Input.GetButtonDown("Cancel")){
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //Restart Scene
         }
+    }
+    void AddVelocity(float speedX, float speedY){ //Add speed with velocity function
+        float horizontalVelocity = rb.velocity.x;
+        float verticalVelocity = rb.velocity.y;
+        horizontalVelocity += speedX;
+        verticalVelocity += speedY;
+        rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
+    }
+    void SetYVelocity(float speedX, float speedY){ //Add Speed to X, and set Y
+        float horizontalVelocity = rb.velocity.x;
+        horizontalVelocity += speedX;
+        rb.velocity = new Vector2(horizontalVelocity, speedY);
+    }
+    void SetVelocity(float speedX, float speedY){ //Set both X and Y velocity
+        rb.velocity = new Vector2(speedX, speedY);
     }
     public void SetLeftWall(bool exists){ //Setter for leftWall
         leftWall = exists;

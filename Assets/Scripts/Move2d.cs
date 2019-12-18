@@ -44,6 +44,14 @@ public class Move2d : MonoBehaviour
         dampSpeed = 220 / speedCapX;
         speedCapX = speedLimitX;
         speedCapY = speedLimitY;
+        SetGravity();
+    }
+    void SetGravity(){
+        float gravity = rb.gravityScale;
+        wallJumpY *= (3f/4f * gravity);
+        doubleJumpHeight *= (3f/4f  *gravity);
+        jumpHeight *= (3f/4f * gravity);
+        dashLengthY *= (3f/4f * gravity);
     }
     void Update(){ //Once per frame, good for getting Input from the User
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -86,7 +94,7 @@ public class Move2d : MonoBehaviour
         if(dashBufferTimer > 0 && numDashes > 0 && dashTimer < 0){ 
             SetDashDirection();
             speedCapX = speedLimitX + Mathf.Abs(dashX);
-            speedCapY = speedLimitY + Mathf.Abs(dashY);
+            //speedCapY = speedLimitY + Mathf.Abs(dashY);
             numDashes--;
             dashTimer = dashActiveTime;
             dashBufferTimer = 0;

@@ -5562,7 +5562,7 @@ PrefabInstance:
     - target: {fileID: 7628640688249597256, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.25
+      value: -0.17
       objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597256, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
@@ -5637,7 +5637,7 @@ PrefabInstance:
     - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
       propertyPath: wallJumpY
-      value: 5
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597258, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
@@ -5647,7 +5647,7 @@ PrefabInstance:
     - target: {fileID: 7628640688249597258, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
       propertyPath: m_GravityScale
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597261, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}

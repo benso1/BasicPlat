@@ -43,14 +43,30 @@ public class Move2d : MonoBehaviour
     private bool leftWall = false;
     private bool rightWall = false;
     private bool isJumping = false;
+    private bool isDoubleJumping = false;
+    private bool isWallJumping = false;
+    private bool isDashing = false;
+    private bool jumpParticles = false;
+    private bool doubleJumpParticles = false;
+    private bool wallJumpParticles = false;
+    private bool dashParticles = false;
+    public float particleJumpLength = 0.75f;
+    public float particleDoubleJumpLength = 0.75f;
+    public float particleWallJumpLength = 0.75f;
+    public float particleDashLength = 0.75f;
+    private float particleTimer = 0f;
     public Rigidbody2D rb;
+    public ParticleSystem ps;
+    public ParticleSystem.MainModule main;
     void Start(){ //Initializes variables
         dampSpeed = 220 / speedCapX;
         speedCapX = speedLimitX;
         speedCapY = speedLimitY;
+        main = ps.main;
         SetGravity();
+        ps.Stop();
     }
-    void SetGravity(){
+    void SetGravity(){ //Set y-velocities to scale with gravity
         float gravity = rb.gravityScale;
         wallJumpY *= (3f/4f * gravity);
         doubleJumpHeight *= (3f/4f  *gravity);
@@ -69,11 +85,57 @@ public class Move2d : MonoBehaviour
         Dash();
         WallJump();
         CapSpeeds();
+        Particles();
+    }
+    void Particles(){ //Runs particle effects until animations are added
+        if(isJumping && !jumpParticles){
+            UpdateParticles();
+            main.startColor = new Color(0f, 0f, 0f, 1f);
+            particleTimer = particleJumpLength;
+            jumpParticles = true;
+            ps.Play();
+        }
+        if(isDoubleJumping && !doubleJumpParticles){
+            UpdateParticles();
+            main.startColor = Color.blue;
+            particleTimer = particleDoubleJumpLength;
+            doubleJumpParticles = true;
+            ps.Play();
+        }
+        if(isDashing && !dashParticles){
+            UpdateParticles();
+            main.startColor = Color.magenta;
+            particleTimer = particleDashLength;
+            dashParticles = true;
+            ps.Play();
+        }
+        if(isWallJumping && !wallJumpParticles){
+            UpdateParticles();
+            main.startColor = Color.red;
+            particleTimer = particleWallJumpLength;
+            wallJumpParticles = true;
+            ps.Play();
+        }
+    }
+    void UpdateParticles(){ //Lets us know which particles are running so we don't disable them
+        wallJumpParticles = false;
+        dashParticles = false;
+        jumpParticles = false;
+        doubleJumpParticles = false;
+        UpdateState();
+        ps.Stop();
     }
     void DecrementTimers(){ //Lowers the time on all timers
         jumpBufferTimer -= Time.deltaTime;
         coyoteTimer -= Time.deltaTime;
         dashBufferTimer -= Time.deltaTime;
+        
+        if(particleTimer >= 0){
+            particleTimer -= Time.deltaTime;
+        }
+        if(particleTimer < 0){
+            UpdateParticles();
+        }
 
         if(dashTimer >= 0){
             dashTimer -= Time.deltaTime;
@@ -87,7 +149,6 @@ public class Move2d : MonoBehaviour
     void SetTimers(){ //Sets timers based on Inputs
         if(Input.GetButtonDown("Jump")){
             jumpBufferTimer = jumpBuffer;
-            isJumping = false;
         }
         if(isGrounded){
             coyoteTimer = coyoteBuffer;
@@ -109,6 +170,8 @@ public class Move2d : MonoBehaviour
             numDashes--;
             dashTimer = dashActiveTime;
             dashBufferTimer = 0;
+            UpdateState();
+            isDashing = true;
             SetDashVelocity();
         }
     }
@@ -135,7 +198,7 @@ public class Move2d : MonoBehaviour
             dashX = dashLengthX;
         } //8 Direction Dash Setup
     }
-    void SetDashVelocity(){
+    void SetDashVelocity(){ //Sets the direction of the dash
         float horizontalVelocity = rb.velocity.x;
         float verticalVelocity = rb.velocity.y;
         horizontalVelocity += dashX;
@@ -177,6 +240,12 @@ public class Move2d : MonoBehaviour
     void SetVelocity(float speedX, float speedY){ //Set both X and Y velocity
         rb.velocity = new Vector2(speedX, speedY);
     }
+    void UpdateState(){ //Lets us figure out which state we are in for animation/particle effects
+        isJumping = false;
+        isDoubleJumping = false;
+        isWallJumping = false;
+        isDashing = false;
+    }
     void WallJump(){ //Jump with Space, Double Jump while in air, Wall Jump when on wall
         if(coyoteTimer > 0){
             doubleJump = extraJumps;
@@ -184,6 +253,7 @@ public class Move2d : MonoBehaviour
                 SetYVelocity(0, jumpHeight); //Jump
                 jumpBufferTimer = 0;
                 coyoteTimer = 0;
+                UpdateState();
                 isJumping = true;
                 shortHopTimer = shortHopTime;
             }
@@ -191,16 +261,24 @@ public class Move2d : MonoBehaviour
         else{
             if(jumpBufferTimer > 0){
                 if(leftWall){
+                    UpdateState();
+                    isWallJumping = true;
                     SetYVelocity(wallJumpX, wallJumpY); //Wall Jump from Left
+                    jumpBufferTimer = 0;
                 }
                 else if(rightWall){
+                    UpdateState();
+                    isWallJumping = true;
                     SetYVelocity(-wallJumpX, wallJumpY); //Wall Jump from Right
+                    jumpBufferTimer = 0;
                 }
                 else if(doubleJump > 0){
                     doubleJump--;
+                    UpdateState();
+                    isDoubleJumping = true;
                     SetYVelocity(0, doubleJumpHeight); //Double Jump
+                    jumpBufferTimer = 0;
                 }
-                jumpBufferTimer = 0;
             }
         }
     }

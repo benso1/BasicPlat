@@ -34,12 +34,15 @@ public class Move2d : MonoBehaviour
     private float dampSpeed = 0f;
     private int numDashes = 1;
     private int doubleJump = 1;
+    public float shortHopTime = 0.2f;
+    private float shortHopTimer = 0f;
     public float stopSpeed = 5f;
     public float testVeloX = 0f;
     public float testVeloY = 0f;
     private bool isGrounded = false;
     private bool leftWall = false;
     private bool rightWall = false;
+    private bool isJumping = false;
     public Rigidbody2D rb;
     void Start(){ //Initializes variables
         dampSpeed = 220 / speedCapX;
@@ -71,8 +74,12 @@ public class Move2d : MonoBehaviour
         jumpBufferTimer -= Time.deltaTime;
         coyoteTimer -= Time.deltaTime;
         dashBufferTimer -= Time.deltaTime;
-        dashTimer -= Time.deltaTime;
+
+        if(dashTimer >= 0){
+            dashTimer -= Time.deltaTime;
+        }
         if (dashTimer < 0){
+            dashTimer = -1f;
             speedCapX = speedLimitX;
             speedCapY = speedLimitY;
         }
@@ -80,12 +87,15 @@ public class Move2d : MonoBehaviour
     void SetTimers(){ //Sets timers based on Inputs
         if(Input.GetButtonDown("Jump")){
             jumpBufferTimer = jumpBuffer;
+            isJumping = false;
         }
         if(isGrounded){
             coyoteTimer = coyoteBuffer;
+            isJumping = false;
         }
         if(Input.GetButtonDown("Fire3")){
             dashBufferTimer = dashBuffer;
+            isJumping = false;
         }
     }
     void Dash(){ //Lets player dash on Left Shift
@@ -174,6 +184,8 @@ public class Move2d : MonoBehaviour
                 SetYVelocity(0, jumpHeight); //Jump
                 jumpBufferTimer = 0;
                 coyoteTimer = 0;
+                isJumping = true;
+                shortHopTimer = shortHopTime;
             }
         }
         else{

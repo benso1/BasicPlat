@@ -221,7 +221,7 @@ public class Move2d : MonoBehaviour
         }
         if(dashBufferTimer > 0 && numDashes > 0 && dashTimer < 0){ 
             SetDashDirection();
-            speedCapX = speedLimitX + Mathf.Abs(dashX);
+            //speedCapX = speedLimitX + Mathf.Abs(dashX);
             //speedCapY = speedLimitY + Mathf.Abs(dashY);
             numDashes--;
             dashTimer = dashActiveTime;
@@ -403,28 +403,8 @@ public class Move2d : MonoBehaviour
     void SetDashVelocity(){ //Sets the direction of the dash
         float horizontalVelocity = rb.velocity.x;
         float verticalVelocity = rb.velocity.y;
-        horizontalVelocity += dashX;
-        verticalVelocity += dashY;
-        if(dashX > 0){
-            if(horizontalVelocity < dashX){
-                horizontalVelocity = dashX;
-            }
-        }
-        else if(dashX < 0){
-            if(horizontalVelocity > -dashX){
-                horizontalVelocity = -dashX;
-            }
-        }
-        if(dashY > 0){
-            if(verticalVelocity < dashY){
-                verticalVelocity = dashY;
-            }
-        }
-        else if(dashY < 0){
-            if(verticalVelocity > -dashY){
-                verticalVelocity = -dashY;
-            }
-        }
+        horizontalVelocity = dashX;
+        verticalVelocity = dashY;
         rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
     }
     void AddVelocity(float speedX, float speedY){ //Add speed with velocity function

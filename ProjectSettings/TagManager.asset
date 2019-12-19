@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - WallRunWall
+  - Item
   layers:
   - Default
   - TransparentFX

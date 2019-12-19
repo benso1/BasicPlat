@@ -444,4 +444,13 @@ public class Move2d : MonoBehaviour
     public void SetKeepSliding(bool exists){ //Setter for keepSliding
         keepSliding = exists;
     }
+    public void CollectableParticles(){
+        ps.Stop();
+        main.duration = 10f;
+        var em = ps.emission;
+        em.rateOverTime = 100f;
+        var shape = ps.shape;
+        shape.radius = 2f;
+        ps.Play();
+    }
 }

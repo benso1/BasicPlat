@@ -24,8 +24,11 @@ public class Move2d : MonoBehaviour
     private float dashY = 5f;
     private int maxDashes = 1;
     private int numDashes = 1;
+//Wall Run
+    public float wallRunDropSpeed = 0.1f;
 //Slide
     public float slideLength = 5f;
+    private bool keepSliding = false;
 //Timers
     private float dashTimer = 0f;
     public float dashActiveTime = 0.25f;
@@ -116,7 +119,7 @@ public class Move2d : MonoBehaviour
         jumpBufferTimer -= Time.deltaTime;
         coyoteBufferTimer -= Time.deltaTime;
         dashBufferTimer -= Time.deltaTime;
-        
+
         if(wallJumpBufferTimer >= 0){
             wallJumpBufferTimer -= Time.deltaTime;
             if(leftWallLast && isWallJumping){
@@ -157,12 +160,16 @@ public class Move2d : MonoBehaviour
             speedCapX = speedLimitX;
             speedCapY = speedLimitY;
         }
-        if(slideTimer >= 0){
+        if(slideTimer >= 0 && slideTimer < 5f){
             slideTimer -= Time.deltaTime;
         }
         if (slideTimer < 0){
-            slideTimer = -1f;
+            slideTimer = 5f;
             player.localScale = new Vector3(player.localScale.x, playerScaleY, player.localScale.z);
+            if(keepSliding){
+                slideTimer = 0f;
+                player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
+            }
         }
     }
     void SetTimers(){ //Sets timers based on Inputs
@@ -292,8 +299,8 @@ public class Move2d : MonoBehaviour
             UpdateState();
             isWallRunning = true;
             wallRunBufferTimer = 0;
-            if(rb.velocity.y < 0){
-                SetYVelocity(0, 0);
+            if(rb.velocity.y < -wallRunDropSpeed){
+                SetYVelocity(0, -wallRunDropSpeed);
             }
         }
     }
@@ -433,5 +440,8 @@ public class Move2d : MonoBehaviour
     }
     public void SetWallGrounded(bool exists){ //Setter for isGrounded
         isWallGrounded = exists;
+    }
+    public void SetKeepSliding(bool exists){ //Setter for keepSliding
+        keepSliding = exists;
     }
 }

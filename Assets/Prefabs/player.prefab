@@ -4986,37 +4986,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jumpHeight: 4.2
   doubleJumpHeight: 4.2
-  extraJumps: 1
-  wallJumpX: 4
-  wallJumpY: 7
-  dashLengthX: 5
-  dashLengthY: 5
-  maxDashes: 1
-  dashActiveTime: 0.25
+  wallJumpX: 5
+  wallJumpY: 5
+  wallJumpBackSpeed: 0.1
+  dashLengthX: 17
+  dashLengthY: 7
+  wallRunDropSpeed: 0.5
+  slideLength: 5
+  dashActiveTime: 0.65
   slideActiveTime: 0.25
   jumpBuffer: 0.1
+  wallJumpBuffer: 0.65
   coyoteBuffer: 0.1
   dashBuffer: 0.2
   wallRunBuffer: 0.2
-  horizontalDamping: 0.2
+  stopSpeed: 2
+  horizontalDamping: 0.3
   speedLimitX: 20
   speedLimitY: 10
   maxFallSpeed: 20
-  shortHopTime: 0.1
-  stopSpeed: 2
-  slideLength: 5
   testVeloX: 0
   testVeloY: 0
-  isWallRunning: 0
-  particleJumpLength: 0.5
-  particleDoubleJumpLength: 0.5
-  particleWallJumpLength: 0.45
-  particleDashLength: 0.45
-  particleSlideLength: 0.45
-  wallRunLength: 0.75
+  player: {fileID: 7628640688249597256}
   rb: {fileID: 7628640688249597258}
   ps: {fileID: 1924632394}
-  player: {fileID: 7628640688249597256}
 --- !u!1 &8111869218394675996
 GameObject:
   m_ObjectHideFlags: 0

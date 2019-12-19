@@ -223,7 +223,7 @@ public class Move2d : MonoBehaviour
         }
     }
     void Dash(){ //Lets player dash on Left Shift
-        if(isGrounded && dashTimer < 0){ //Resets Dashes on ground
+        if(isGrounded){ //Resets Dashes on ground
             numDashes = maxDashes; 
         }
         if(dashBufferTimer > 0 && numDashes > 0 && dashTimer < 0){ 

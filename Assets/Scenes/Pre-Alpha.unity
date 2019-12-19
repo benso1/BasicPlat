@@ -204,7 +204,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 38.15, y: -4.36, z: -10}
+  m_LocalPosition: {x: -25.2, y: -4.36, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -7230,12 +7230,12 @@ PrefabInstance:
     - target: {fileID: 7628640688249597256, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 35.17
+      value: -22.8
       objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597256, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -5.03
+      value: -2.7
       objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597256, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
@@ -7281,6 +7281,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
+        type: 3}
+      propertyPath: wallJumpX
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
+        type: 3}
+      propertyPath: wallJumpY
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
+        type: 3}
+      propertyPath: dashActiveTime
+      value: 0.65
+      objectReference: {fileID: 0}
+    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
+        type: 3}
+      propertyPath: baseDampingSpeed
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
+        type: 3}
+      propertyPath: horizontalDamping
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
+        type: 3}
+      propertyPath: wallJumpBackSpeed
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597261, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}

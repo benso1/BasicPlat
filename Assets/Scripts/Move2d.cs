@@ -14,6 +14,9 @@ public class Move2d : MonoBehaviour
 //Wall Jump
     public float wallJumpX = 4f;
     public float wallJumpY = 3f;
+    private bool leftWallLast = false;
+    private bool rightWallLast = false;
+    public float wallJumpBackSpeed = 0.2f;
 //Dash
     public float dashLengthX = 5f;
     private float dashX = 5f;
@@ -33,6 +36,8 @@ public class Move2d : MonoBehaviour
 //Buffers
     private float jumpBufferTimer = 0f;
     public float jumpBuffer = 0.2f;
+    private float wallJumpBufferTimer = 0f;
+    public float wallJumpBuffer = 0.2f;
     private float coyoteBufferTimer = 0f;
     public float coyoteBuffer = 0.2f;
     private float dashBufferTimer = 0f;
@@ -111,7 +116,31 @@ public class Move2d : MonoBehaviour
         jumpBufferTimer -= Time.deltaTime;
         coyoteBufferTimer -= Time.deltaTime;
         dashBufferTimer -= Time.deltaTime;
-        wallRunBufferTimer -= Time.deltaTime;
+        
+        if(wallJumpBufferTimer >= 0){
+            wallJumpBufferTimer -= Time.deltaTime;
+            if(leftWallLast && isWallJumping){
+                if(horizontalInput < -wallJumpBackSpeed){
+                    horizontalInput = -wallJumpBackSpeed;
+                }
+            }
+            else if(rightWallLast && isWallJumping){
+                if(horizontalInput > wallJumpBackSpeed){
+                    horizontalInput = wallJumpBackSpeed;
+                }
+            }
+        }
+        if(wallJumpBufferTimer < 0){
+            leftWallLast = false;
+            rightWallLast = false;
+        }
+
+        if(wallRunBufferTimer >= 0){
+            wallRunBufferTimer -= Time.deltaTime;
+        }
+        if(wallRunBufferTimer < 0){
+            //Wall Run Ends
+        }
         
         if(particleTimer >= 0){
             particleTimer -= Time.deltaTime;
@@ -233,14 +262,20 @@ public class Move2d : MonoBehaviour
                 if(leftWall){
                     UpdateState();
                     isWallJumping = true;
-                    SetYVelocity(wallJumpX, wallJumpY); //Wall Jump from Left
+                    SetVelocity(wallJumpX, wallJumpY); //Wall Jump from Left
                     jumpBufferTimer = 0;
+                    wallJumpBufferTimer = wallJumpBuffer;
+                    leftWallLast = true;
+                    rightWallLast = false;
                 }
                 else if(rightWall){
                     UpdateState();
                     isWallJumping = true;
-                    SetYVelocity(-wallJumpX, wallJumpY); //Wall Jump from Right
+                    SetVelocity(-wallJumpX, wallJumpY); //Wall Jump from Right
                     jumpBufferTimer = 0;
+                    wallJumpBufferTimer = wallJumpBuffer;
+                    rightWallLast = true;
+                    leftWallLast = false;
                 }
                 else if(doubleJump > 0){
                     doubleJump--;

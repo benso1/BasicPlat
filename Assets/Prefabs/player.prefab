@@ -5057,24 +5057,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jumpHeight: 4.2
   doubleJumpHeight: 4.2
-  wallJumpX: 5
+  wallJumpX: 8
   wallJumpY: 5
   wallJumpBackSpeed: 0.1
   dashLengthX: 17
   dashLengthY: 7
   wallRunDropSpeed: 0.5
   slideLength: 5
-  slideTransformDrop: 0.25
-  slideY: 0
-  slideAdjustY: 0
-  slideAdj: 0
-  dashActiveTime: 0.65
+  slideAdjustY: 1.5
+  barSwingSpeed: 5
+  barSwingAngle: 190
+  dashActiveTime: 0.45
   slideActiveTime: 0.25
+  barSwingActiveTime: 0.5
   jumpBuffer: 0.1
   wallJumpBuffer: 0.65
   coyoteBuffer: 0.1
   dashBuffer: 0.2
   wallRunBuffer: 0.2
+  barSwingBuffer: 0.2
   stopSpeed: 2
   horizontalDamping: 0.3
   speedLimitX: 12

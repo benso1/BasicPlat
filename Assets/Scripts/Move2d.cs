@@ -29,10 +29,11 @@ public class Move2d : MonoBehaviour
 //Slide
     public float slideLength = 5f;
     private bool keepSliding = false;
-    public float slideTransformDrop = 1.5f;
-    public float slideY = 0f;
     public float slideAdjustY = 0f;
-    public bool slideAdj = false;
+    private bool slideAdj = false;
+//Bar Swing
+    public float barSwingSpeed = 5f;
+    public int barSwingAngle = 190;
 //Timers
     private float dashTimer = 0f;
     public float dashActiveTime = 0.25f;
@@ -40,6 +41,8 @@ public class Move2d : MonoBehaviour
     public float slideActiveTime = 0.25f;
     private float shortHopTime = 0.2f;
     private float shortHopTimer = 0f;
+    private float barSwingTimer = 0f;
+    public float barSwingActiveTime = 0.5f;
 //Buffers
     private float jumpBufferTimer = 0f;
     public float jumpBuffer = 0.2f;
@@ -51,6 +54,9 @@ public class Move2d : MonoBehaviour
     public float dashBuffer = 0.2f;
     private float wallRunBufferTimer = 0f;
     public float wallRunBuffer = 0.2f;
+    private float barSwingBufferTimer = 0f;
+    public float barSwingBuffer = 0.2f;
+    
 //Speed and Velocity
     private float horizontalInput = 0f;
     private float verticalInput = 0f;
@@ -75,6 +81,7 @@ public class Move2d : MonoBehaviour
     private bool isDashing = false;
     private bool isSliding = false;
     private bool isWallRunning = false;
+    private bool isBarSwinging = false;
 //Particle Effects
     private bool jumpParticles = false;
     private bool doubleJumpParticles = false;
@@ -82,12 +89,14 @@ public class Move2d : MonoBehaviour
     private bool wallRunParticles = false;
     private bool dashParticles = false;
     private bool slideParticles = false;
+    private bool barSwingParticles = false;
     private float particleJumpLength = 0.75f;
     private float particleDoubleJumpLength = 0.75f;
     private float particleWallJumpLength = 0.75f;
     private float particleDashLength = 0.75f;
     private float particleSlideLength = 0.75f;
     private float particleWallRunLength = 0.75f;
+    private float particleBarSwingLength = 0.75f;
     private float particleTimer = 0f;
 //Stored Objects
     private float playerScaleY;
@@ -180,22 +189,27 @@ public class Move2d : MonoBehaviour
             var position = player.position;
             position.y -= slideAdjustY;
         }
+        if(barSwingTimer >= 0){
+            barSwingTimer -= Time.deltaTime;
+        }
+        if(barSwingTimer < 0){
+            //Bar Swing
+        }
     }
     void SetTimers(){ //Sets timers based on Inputs
-        if(Input.GetButtonDown("Jump")){ //Space
+        if(Input.GetButtonDown("Jump")){ //Space, a button
             jumpBufferTimer = jumpBuffer;
         }
         if(isGrounded){
             coyoteBufferTimer = coyoteBuffer;
             isJumping = false;
         }
-        if(Input.GetButtonDown("Fire3")){ //Left Shift
+        if(Input.GetButtonDown("Fire3")){ //j key, y button
             dashBufferTimer = dashBuffer;
-            isJumping = false;
         }
-        if(Input.GetButton("Fire1")){ //Left Ctrl
+        if(Input.GetButton("Fire1")){ //k key, r1 button
             wallRunBufferTimer = wallRunBuffer;
-            isJumping = false;
+            barSwingBufferTimer = barSwingBuffer;
         }
     }
     void Reset(){//Restart Level on Escape Key
@@ -219,6 +233,7 @@ public class Move2d : MonoBehaviour
         isDashing = false;
         isSliding = false;
         isWallRunning = false;
+        isBarSwinging = false;
     }
     void Run(){ //Adjust horizontal speed based on Arrow Keys
         if(rb.velocity.x < stopSpeed && rb.velocity.x > 0 && horizontalInput <= 0){
@@ -258,7 +273,6 @@ public class Move2d : MonoBehaviour
             }
             player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
             AddVelocity(slideDirection, 0);
-            SetYVelocity(0,0);
             slideTimer = slideActiveTime;
             slideAdj = true;
         }
@@ -314,6 +328,9 @@ public class Move2d : MonoBehaviour
                 SetYVelocity(0, -wallRunDropSpeed);
             }
         }
+    }
+    void BarSwing(){
+        
     }
     void CapSpeeds(){ //Prevent player from moving too fast
         float horizontalVelocity = rb.velocity.x;
@@ -384,6 +401,14 @@ public class Move2d : MonoBehaviour
             wallRunParticles = true;
             ps.Play();
         }
+        if(isBarSwinging && !barSwingParticles){
+            UpdateParticles();
+            isBarSwinging = true;
+            main.startColor = new Color(0.75f, 0f, 1f, 1f);
+            particleTimer = particleBarSwingLength;
+            barSwingParticles = true;
+            ps.Play();
+        }
     }
     void UpdateParticles(){ //Lets us know which particles are running so we don't disable them
         wallJumpParticles = false;
@@ -392,6 +417,7 @@ public class Move2d : MonoBehaviour
         doubleJumpParticles = false;
         slideParticles = false;
         wallRunParticles = false;
+        barSwingParticles = false;
         UpdateState();
         ps.Stop();
     }
@@ -455,9 +481,8 @@ public class Move2d : MonoBehaviour
     public void SetKeepSliding(bool exists){ //Setter for keepSliding
         keepSliding = exists;
     }
-    public void CollectableParticles(){
+    public void CollectableParticles(){ //Collect Item and up the particle radius
         ps.Stop();
-        main.duration = 10f;
         var em = ps.emission;
         em.rateOverTime = 100f;
         var shape = ps.shape;

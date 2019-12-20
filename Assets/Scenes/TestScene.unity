@@ -2027,21 +2027,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
-        type: 3}
-      propertyPath: dashActiveTime
-      value: 0.45
-      objectReference: {fileID: 0}
-    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
-        type: 3}
-      propertyPath: slideAdjustY
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7628640688249597257, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
-        type: 3}
-      propertyPath: wallJumpX
-      value: 8
-      objectReference: {fileID: 0}
     - target: {fileID: 7628640688249597261, guid: e7901f9e1ac6b7048bb3db9f5a973d91,
         type: 3}
       propertyPath: m_Name

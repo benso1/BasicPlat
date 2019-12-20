@@ -29,6 +29,10 @@ public class Move2d : MonoBehaviour
 //Slide
     public float slideLength = 5f;
     private bool keepSliding = false;
+    public float slideTransformDrop = 1.5f;
+    public float slideY = 0f;
+    public float slideAdjustY = 0f;
+    public bool slideAdj = false;
 //Timers
     private float dashTimer = 0f;
     public float dashActiveTime = 0.25f;
@@ -171,6 +175,11 @@ public class Move2d : MonoBehaviour
                 player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
             }
         }
+        if(slideAdj){
+            slideAdj = false;            
+            var position = player.position;
+            position.y -= slideAdjustY;
+        }
     }
     void SetTimers(){ //Sets timers based on Inputs
         if(Input.GetButtonDown("Jump")){ //Space
@@ -247,9 +256,11 @@ public class Move2d : MonoBehaviour
             if(dashX < 0){
                 slideDirection = -slideLength;
             }
-            AddVelocity(slideDirection, 0);
-            slideTimer = slideActiveTime;
             player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
+            AddVelocity(slideDirection, 0);
+            SetYVelocity(0,0);
+            slideTimer = slideActiveTime;
+            slideAdj = true;
         }
     }
     void WallJump(){ //Jump with Space, Double Jump while in air, Wall Jump when on wall

@@ -248,7 +248,7 @@ public class Move2d : MonoBehaviour
         }
     }
     void Slide(){ //Slide when you dash into the ground
-        if(isDashing && dashY < 0 && isGrounded){
+        if(isDashing && verticalInput < 0 && isGrounded){
             UpdateState();
             isSliding = true;
             speedCapX = speedLimitX + Mathf.Abs(slideLength);

@@ -136,13 +136,13 @@ public class Move2d : MonoBehaviour
         if(wallJumpBufferTimer >= 0){
             wallJumpBufferTimer -= Time.deltaTime;
             if(leftWallLast && isWallJumping){
-                if(horizontalInput < -wallJumpBackSpeed){
-                    horizontalInput = -wallJumpBackSpeed;
+                if(horizontalInput < wallJumpBackSpeed){
+                    horizontalInput = wallJumpBackSpeed;
                 }
             }
             else if(rightWallLast && isWallJumping){
-                if(horizontalInput > wallJumpBackSpeed){
-                    horizontalInput = wallJumpBackSpeed;
+                if(horizontalInput > -wallJumpBackSpeed){
+                    horizontalInput = -wallJumpBackSpeed;
                 }
             }
         }

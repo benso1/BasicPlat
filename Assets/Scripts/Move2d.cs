@@ -421,7 +421,12 @@ public class Move2d : MonoBehaviour
     void CapSpeeds(){ //Prevent player from moving too fast
         float horizontalVelocity = rb.velocity.x;
         float verticalVelocity = rb.velocity.y;
-        horizontalVelocity *= Mathf.Pow(1f - horizontalDamping, Time.deltaTime * dampSpeed);
+        if(horizontalInput == 0){
+            horizontalVelocity *= Mathf.Pow(0.4f, Time.deltaTime * dampSpeed);
+        }
+        else{
+            horizontalVelocity *= Mathf.Pow(1f - horizontalDamping, Time.deltaTime * dampSpeed);
+        }
         if(horizontalVelocity > speedCapX){
             horizontalVelocity = speedCapX;
         }

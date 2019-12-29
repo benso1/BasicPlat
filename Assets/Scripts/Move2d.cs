@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 
 public class Move2d : MonoBehaviour
 {
@@ -34,6 +35,16 @@ public class Move2d : MonoBehaviour
 //Bar Swing
     public float barSwingSpeed = 5f;
     public int barSwingAngle = 190;
+    public float barSwingRadius = 1f;
+    public bool barSwingAvailable = false;
+    private bool isBarSwingActive = false;
+    private float savedBarX = 0f;
+    private float savedBarY = 0f;
+    private float veloX = 1f;
+    private float veloY = 1f;
+//Bumper Jump
+    public float bumperJumpHeight = 10f;
+    private bool bumperAvailable = false;
 //Timers
     private float dashTimer = 0f;
     public float dashActiveTime = 0.25f;
@@ -42,7 +53,8 @@ public class Move2d : MonoBehaviour
     private float shortHopTime = 0.2f;
     private float shortHopTimer = 0f;
     private float barSwingTimer = 0f;
-    public float barSwingActiveTime = 0.5f;
+    private float barSwingActiveTime = 0.5f;
+    private float currentVelocityMax = 0f;
 //Buffers
     private float jumpBufferTimer = 0f;
     public float jumpBuffer = 0.2f;
@@ -56,6 +68,8 @@ public class Move2d : MonoBehaviour
     public float wallRunBuffer = 0.2f;
     private float barSwingBufferTimer = 0f;
     public float barSwingBuffer = 0.2f;
+    public float bumperJumpBuffer = 0.2f;
+    private float bumperBufferTimer = 0f;
     
 //Speed and Velocity
     private float horizontalInput = 0f;
@@ -70,6 +84,7 @@ public class Move2d : MonoBehaviour
     public float maxFallSpeed = 20f;
     public float testVeloX = 0f;
     public float testVeloY = 0f;
+    private float gravity = 0f;
 //States
     private bool leftWall = false;
     private bool rightWall = false;
@@ -82,6 +97,7 @@ public class Move2d : MonoBehaviour
     private bool isSliding = false;
     private bool isWallRunning = false;
     private bool isBarSwinging = false;
+    private bool isBumperJumping = false;
 //Particle Effects
     private bool jumpParticles = false;
     private bool doubleJumpParticles = false;
@@ -90,6 +106,7 @@ public class Move2d : MonoBehaviour
     private bool dashParticles = false;
     private bool slideParticles = false;
     private bool barSwingParticles = false;
+    private bool bumperJumpParticles = false;
     private float particleJumpLength = 0.75f;
     private float particleDoubleJumpLength = 0.75f;
     private float particleWallJumpLength = 0.75f;
@@ -97,7 +114,9 @@ public class Move2d : MonoBehaviour
     private float particleSlideLength = 0.75f;
     private float particleWallRunLength = 0.75f;
     private float particleBarSwingLength = 0.75f;
+    private float particleBumperLength = 0.75f;
     private float particleTimer = 0f;
+    private float particleRadius = 1f;
 //Stored Objects
     private float playerScaleY;
     public Transform player;
@@ -115,7 +134,7 @@ public class Move2d : MonoBehaviour
         ps.Stop();
     }
     void SetGravity(){ //Set y-velocities to scale with gravity
-        float gravity = rb.gravityScale;
+        gravity = rb.gravityScale;
         wallJumpY *= (3f/4f * gravity);
         doubleJumpHeight *= (3f/4f  *gravity);
         jumpHeight *= (3f/4f * gravity);
@@ -126,6 +145,7 @@ public class Move2d : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
         DecrementTimers();
         SetTimers();
+        BarSwing();
         Reset();
     }
     void DecrementTimers(){ //Lowers the time on all timers
@@ -173,6 +193,7 @@ public class Move2d : MonoBehaviour
             speedCapX = speedLimitX;
             speedCapY = speedLimitY;
         }
+
         if(slideTimer >= 0 && slideTimer < 5f){
             slideTimer -= Time.deltaTime;
         }
@@ -189,11 +210,20 @@ public class Move2d : MonoBehaviour
             var position = player.position;
             position.y -= slideAdjustY;
         }
-        if(barSwingTimer >= 0){
-            barSwingTimer -= Time.deltaTime;
+
+        if(barSwingBufferTimer >= 0){
+            barSwingBufferTimer -= Time.deltaTime;
         }
-        if(barSwingTimer < 0){
-            //Bar Swing
+        if(barSwingBufferTimer < 0){
+            isBarSwingActive = false;
+            //rb.gravityScale = gravity;
+            rb.isKinematic = false;
+        }
+
+        if(bumperBufferTimer >= 0){
+            bumperBufferTimer -= Time.deltaTime;
+        }
+        if(bumperBufferTimer < 0){
         }
     }
     void SetTimers(){ //Sets timers based on Inputs
@@ -210,6 +240,7 @@ public class Move2d : MonoBehaviour
         if(Input.GetButton("Fire1")){ //k key, r1 button
             wallRunBufferTimer = wallRunBuffer;
             barSwingBufferTimer = barSwingBuffer;
+            bumperBufferTimer = bumperJumpBuffer;
         }
     }
     void Reset(){//Restart Level on Escape Key
@@ -223,6 +254,8 @@ public class Move2d : MonoBehaviour
         Slide();
         WallJump();
         WallRun();
+        //BarSwing();
+        BumperJump();
         CapSpeeds();
         DisplayParticles();
     }
@@ -234,6 +267,7 @@ public class Move2d : MonoBehaviour
         isSliding = false;
         isWallRunning = false;
         isBarSwinging = false;
+        isBumperJumping = false;
     }
     void Run(){ //Adjust horizontal speed based on Arrow Keys
         if(rb.velocity.x < stopSpeed && rb.velocity.x > 0 && horizontalInput <= 0){
@@ -330,7 +364,77 @@ public class Move2d : MonoBehaviour
         }
     }
     void BarSwing(){
-        
+        /**if(barSwingAvailable && barSwingBufferTimer > 0 && !isBarSwingActive){
+            UpdateState();
+            isBarSwinging = true;
+            isBarSwingActive = true;
+            barSwingActiveTime = 0f;
+            currentVelocityMax = Mathf.Sqrt(Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.y, 2));
+            savedBarX = player.position.x;
+            savedBarY = player.position.y;
+            rb.gravityScale = 0f;
+            veloX = 1;
+        }
+        if(barSwingBufferTimer > 0 && isBarSwingActive){
+            //barSwingActiveTime += Time.deltaTime;
+            var position = player.position;
+            if(player.position.x - savedBarX > barSwingRadius){
+                position.x = savedBarX + barSwingRadius;
+                veloX = -1;
+            }
+            if(savedBarX - player.position.x > barSwingRadius){
+                position.x = savedBarX - barSwingRadius;
+                barSwingSpeed = -barSwingSpeed;
+                veloX = 1;
+            }
+            rb.velocity = new Vector2(velo * barSwingSpeed, 0);
+            position.y = savedBarY - Mathf.Sqrt(Mathf.Pow(barSwingRadius, 2) - Mathf.Pow(position.x - savedBarX, 2));
+            player.position = position;
+        }**/
+        if(barSwingAvailable && barSwingBufferTimer > 0 && !isBarSwingActive){
+            UpdateState();
+            isBarSwinging = true;
+            isBarSwingActive = true;
+            barSwingActiveTime = 0f;
+            currentVelocityMax = Mathf.Sqrt(Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.y, 2));
+            savedBarX = player.position.x;
+            savedBarY = player.position.y + barSwingRadius / 2;
+            rb.isKinematic = true;
+            veloX = 1;
+            veloY = 1;
+        }
+        if(barSwingBufferTimer > 0 && isBarSwingActive){
+            var position = player.position;
+            if(player.position.x - savedBarX > barSwingRadius){
+                position.x = savedBarX + barSwingRadius;
+                veloX = -1;
+            }
+            if(savedBarX - player.position.x > barSwingRadius){
+                position.x = savedBarX - barSwingRadius;
+                barSwingSpeed = -barSwingSpeed;
+                veloX = 1;
+            }
+            if(player.position.y - savedBarY > barSwingRadius){
+                position.y = savedBarY + barSwingRadius;
+                veloY = -1;
+            }
+            if(savedBarY - player.position.y > barSwingRadius){
+                position.y = savedBarY - barSwingRadius;
+                barSwingSpeed = -barSwingSpeed;
+                veloY = 1;
+            }
+            rb.velocity = new Vector2(veloX * barSwingSpeed, 0);
+            position.y = savedBarY - Mathf.Sqrt(Mathf.Pow(barSwingRadius, 2) - Mathf.Pow(position.x - savedBarX, 2));
+            player.position = position;
+        }
+    }
+    void BumperJump(){
+        if(bumperAvailable && bumperBufferTimer > 0){
+            UpdateState();
+            isBumperJumping = true;
+            bumperBufferTimer = 0;
+            SetYVelocity(0, bumperJumpHeight);
+        }
     }
     void CapSpeeds(){ //Prevent player from moving too fast
         float horizontalVelocity = rb.velocity.x;
@@ -409,6 +513,14 @@ public class Move2d : MonoBehaviour
             barSwingParticles = true;
             ps.Play();
         }
+        if(isBumperJumping && !bumperJumpParticles){
+            UpdateParticles();
+            isBumperJumping = true;
+            main.startColor = new Color(0.5f, 0.25f, 0.75f, 0.5f);
+            particleTimer = particleBumperLength;
+            bumperJumpParticles = true;
+            ps.Play();
+        }
     }
     void UpdateParticles(){ //Lets us know which particles are running so we don't disable them
         wallJumpParticles = false;
@@ -418,6 +530,7 @@ public class Move2d : MonoBehaviour
         slideParticles = false;
         wallRunParticles = false;
         barSwingParticles = false;
+        bumperJumpParticles = false;
         UpdateState();
         ps.Stop();
     }
@@ -481,12 +594,19 @@ public class Move2d : MonoBehaviour
     public void SetKeepSliding(bool exists){ //Setter for keepSliding
         keepSliding = exists;
     }
+    public void SetBarSwingAvailable(bool exists){ //Setter for BarSwingAvailable
+        barSwingAvailable = exists;
+    }
+    public void SetBumperAvailable(bool exists){ //Setter for BumperAvailable
+        bumperAvailable = exists;
+    }
     public void CollectableParticles(){ //Collect Item and up the particle radius
         ps.Stop();
         var em = ps.emission;
         em.rateOverTime = 100f;
         var shape = ps.shape;
-        shape.radius = 2f;
+        particleRadius += 1;
+        shape.radius = particleRadius;
         ps.Play();
     }
 }

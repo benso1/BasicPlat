@@ -7,6 +7,8 @@ TagManager:
   - Ground
   - WallRunWall
   - Item
+  - Bar
+  - Bumper
   layers:
   - Default
   - TransparentFX

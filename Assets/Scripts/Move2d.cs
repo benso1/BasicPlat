@@ -38,6 +38,8 @@ public class Move2d : MonoBehaviour
     public float barSwingRadius = 1f;
     public bool barSwingAvailable = false;
     private bool isBarSwingActive = false;
+    private float barX = 0f;
+    private float barY = 0f;
     private float savedBarX = 0f;
     private float savedBarY = 0f;
     private float veloX = 1f;
@@ -254,7 +256,6 @@ public class Move2d : MonoBehaviour
         Slide();
         WallJump();
         WallRun();
-        //BarSwing();
         BumperJump();
         CapSpeeds();
         DisplayParticles();
@@ -364,55 +365,36 @@ public class Move2d : MonoBehaviour
         }
     }
     void BarSwing(){
-        /**if(barSwingAvailable && barSwingBufferTimer > 0 && !isBarSwingActive){
-            UpdateState();
-            isBarSwinging = true;
-            isBarSwingActive = true;
-            barSwingActiveTime = 0f;
-            currentVelocityMax = Mathf.Sqrt(Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.y, 2));
-            savedBarX = player.position.x;
-            savedBarY = player.position.y;
-            rb.gravityScale = 0f;
-            veloX = 1;
-        }
-        if(barSwingBufferTimer > 0 && isBarSwingActive){
-            //barSwingActiveTime += Time.deltaTime;
-            var position = player.position;
-            if(player.position.x - savedBarX > barSwingRadius){
-                position.x = savedBarX + barSwingRadius;
-                veloX = -1;
-            }
-            if(savedBarX - player.position.x > barSwingRadius){
-                position.x = savedBarX - barSwingRadius;
-                barSwingSpeed = -barSwingSpeed;
-                veloX = 1;
-            }
-            rb.velocity = new Vector2(velo * barSwingSpeed, 0);
-            position.y = savedBarY - Mathf.Sqrt(Mathf.Pow(barSwingRadius, 2) - Mathf.Pow(position.x - savedBarX, 2));
-            player.position = position;
-        }**/
         if(barSwingAvailable && barSwingBufferTimer > 0 && !isBarSwingActive){
             UpdateState();
             isBarSwinging = true;
             isBarSwingActive = true;
             barSwingActiveTime = 0f;
             currentVelocityMax = Mathf.Sqrt(Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.y, 2));
-            savedBarX = player.position.x;
-            savedBarY = player.position.y + barSwingRadius / 2;
+            savedBarX = barX;
+            savedBarY = barY;
             rb.isKinematic = true;
             veloX = 1;
+            if(rb.velocity.x < 0){
+                veloX = -1;
+            }
             veloY = 1;
         }
         if(barSwingBufferTimer > 0 && isBarSwingActive){
             var position = player.position;
+            
             if(player.position.x - savedBarX > barSwingRadius){
                 position.x = savedBarX + barSwingRadius;
                 veloX = -1;
+                rb.velocity = new Vector2(0,0);
             }
-            if(savedBarX - player.position.x > barSwingRadius){
+            else if(savedBarX - player.position.x > barSwingRadius){
                 position.x = savedBarX - barSwingRadius;
-                barSwingSpeed = -barSwingSpeed;
                 veloX = 1;
+                rb.velocity = new Vector2(0,0);
+            }
+            else{
+                rb.velocity = new Vector2(veloX * barSwingSpeed, 0);
             }
             if(player.position.y - savedBarY > barSwingRadius){
                 position.y = savedBarY + barSwingRadius;
@@ -423,7 +405,7 @@ public class Move2d : MonoBehaviour
                 barSwingSpeed = -barSwingSpeed;
                 veloY = 1;
             }
-            rb.velocity = new Vector2(veloX * barSwingSpeed, 0);
+            
             position.y = savedBarY - Mathf.Sqrt(Mathf.Pow(barSwingRadius, 2) - Mathf.Pow(position.x - savedBarX, 2));
             player.position = position;
         }
@@ -599,6 +581,10 @@ public class Move2d : MonoBehaviour
     }
     public void SetBumperAvailable(bool exists){ //Setter for BumperAvailable
         bumperAvailable = exists;
+    }
+    public void SetBarXY(float x, float y){
+        barX = x;
+        barY = y;
     }
     public void CollectableParticles(){ //Collect Item and up the particle radius
         ps.Stop();

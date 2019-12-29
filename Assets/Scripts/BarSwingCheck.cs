@@ -11,6 +11,7 @@ public class BarSwingCheck : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision){
         if(collision.gameObject.tag == "Bar"){
             Player.GetComponent<Move2d>().SetBarSwingAvailable(true);
+            Player.GetComponent<Move2d>().SetBarXY(collision.gameObject.transform.position.x - 0.05f, collision.gameObject.transform.position.y);
         }
     }
     private void OnTriggerExit2D(Collider2D collision){
@@ -21,6 +22,7 @@ public class BarSwingCheck : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision){
         if(collision.gameObject.tag == "Bar"){
             Player.GetComponent<Move2d>().SetBarSwingAvailable(true);
+            Player.GetComponent<Move2d>().SetBarXY(collision.gameObject.transform.position.x - 0.05f, collision.gameObject.transform.position.y);
         }
     }
     private void OnCollisionExit2D(Collision2D collision){

@@ -56,7 +56,7 @@ public class Move2d : MonoBehaviour
     private float shortHopTimer = 0f;
     private float barSwingTimer = 0f;
     private float barSwingActiveTime = 0.5f;
-    private float currentVelocityMax = 0f;
+    public float currentVelocityMax = 0f;
 //Buffers
     private float jumpBufferTimer = 0f;
     public float jumpBuffer = 0.2f;
@@ -68,7 +68,7 @@ public class Move2d : MonoBehaviour
     public float dashBuffer = 0.2f;
     private float wallRunBufferTimer = 0f;
     public float wallRunBuffer = 0.2f;
-    private float barSwingBufferTimer = 0f;
+    private float barSwingBufferTimer = 5f;
     public float barSwingBuffer = 0.2f;
     public float bumperJumpBuffer = 0.2f;
     private float bumperBufferTimer = 0f;
@@ -213,13 +213,15 @@ public class Move2d : MonoBehaviour
             position.y -= slideAdjustY;
         }
 
-        if(barSwingBufferTimer >= 0){
+        if(barSwingBufferTimer >= 0 && barSwingBufferTimer < 5f){
             barSwingBufferTimer -= Time.deltaTime;
         }
         if(barSwingBufferTimer < 0){
             isBarSwingActive = false;
-            //rb.gravityScale = gravity;
             rb.isKinematic = false;
+            //rb.gravityScale = gravity;
+            SwingLaunch();
+            barSwingBufferTimer = 5f;
         }
 
         if(bumperBufferTimer >= 0){
@@ -365,12 +367,15 @@ public class Move2d : MonoBehaviour
         }
     }
     void BarSwing(){
-        if(barSwingAvailable && barSwingBufferTimer > 0 && !isBarSwingActive){
+        if(barSwingAvailable && barSwingBufferTimer > 0 && barSwingBufferTimer < 5f && !isBarSwingActive){
             UpdateState();
             isBarSwinging = true;
             isBarSwingActive = true;
             barSwingActiveTime = 0f;
             currentVelocityMax = Mathf.Sqrt(Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.y, 2));
+            if(currentVelocityMax < 7){
+                currentVelocityMax = 7;
+            }
             savedBarX = barX;
             savedBarY = barY;
             rb.isKinematic = true;
@@ -380,22 +385,23 @@ public class Move2d : MonoBehaviour
             }
             veloY = 1;
         }
-        if(barSwingBufferTimer > 0 && isBarSwingActive){
+        if(barSwingBufferTimer > 0 && isBarSwingActive && barSwingBufferTimer < 5f){
             var position = player.position;
             
-            if(player.position.x - savedBarX > barSwingRadius){
-                position.x = savedBarX + barSwingRadius;
+            if(player.position.x - savedBarX > barSwingRadius - 0.01f){
+                position.x = savedBarX + barSwingRadius - 0.02f;
                 veloX = -1;
-                rb.velocity = new Vector2(0,0);
+                //rb.velocity = new Vector2(0,0);
             }
-            else if(savedBarX - player.position.x > barSwingRadius){
-                position.x = savedBarX - barSwingRadius;
+            else if(savedBarX - player.position.x > barSwingRadius - 0.01f){
+                position.x = savedBarX - barSwingRadius + 0.02f;
                 veloX = 1;
-                rb.velocity = new Vector2(0,0);
+                //rb.velocity = new Vector2(0,0);
             }
             else{
                 rb.velocity = new Vector2(veloX * barSwingSpeed, 0);
             }
+            
             if(player.position.y - savedBarY > barSwingRadius){
                 position.y = savedBarY + barSwingRadius;
                 veloY = -1;
@@ -417,6 +423,28 @@ public class Move2d : MonoBehaviour
             bumperBufferTimer = 0;
             SetYVelocity(0, bumperJumpHeight);
         }
+    }
+    void SwingLaunch(){
+        Vector3 position = player.position;
+        Vector2 vel = rb.velocity;
+        if(position.x == savedBarX){
+            vel.x = currentVelocityMax;
+            vel.y = 0;
+            return;
+        }
+        float offset = 0.001f;
+        if(position.x < savedBarX){
+            offset = -offset;
+        }
+        float pos2 = savedBarY - Mathf.Sqrt(Mathf.Pow(barSwingRadius, 2) - Mathf.Pow(position.x + offset - savedBarX, 2));
+        Debug.Log(pos2);
+        float diffY = Mathf.Abs(position.y - pos2) / 0.001f;
+        Debug.Log(diffY);
+        float xy = currentVelocityMax / (diffY + 1f);
+        Debug.Log(xy);
+        vel.x = xy;
+        vel.y = diffY * xy;
+        rb.velocity = vel;
     }
     void CapSpeeds(){ //Prevent player from moving too fast
         float horizontalVelocity = rb.velocity.x;
@@ -442,6 +470,12 @@ public class Move2d : MonoBehaviour
         rb.velocity = new Vector2(horizontalVelocity, verticalVelocity);
         testVeloX = rb.velocity.x;
         testVeloY = rb.velocity.y;
+        if(testVeloX > 0){
+            player.GetComponent<SpriteRenderer>().flipX = false;
+        }
+        else if(testVeloX < 0){
+            player.GetComponent<SpriteRenderer>().flipX = true;
+        }
     }
     void DisplayParticles(){ //Runs particle effects until animations are added
         if(isJumping && !jumpParticles){
@@ -566,6 +600,12 @@ public class Move2d : MonoBehaviour
     void SetVelocity(float speedX, float speedY){ //Set both X and Y velocity
         rb.velocity = new Vector2(speedX, speedY);
     }
+    public void AddPosition(float posX, float posY){ //Set both X and Y velocity
+        var position = player.position;
+        position.x += posX;
+        position.y += posY;
+        player.position = position;
+    }
     public void SetLeftWall(bool exists){ //Setter for leftWall
         leftWall = exists;
     }
@@ -599,5 +639,11 @@ public class Move2d : MonoBehaviour
         particleRadius += 1;
         shape.radius = particleRadius;
         ps.Play();
+    }
+    public bool slideAttack(){
+        return isSliding;
+    }
+    public void Damage(){
+        player.GetComponent<SpriteRenderer>().flipY = !player.GetComponent<SpriteRenderer>().flipY;
     }
 }

@@ -9,6 +9,8 @@ TagManager:
   - Item
   - Bar
   - Bumper
+  - SlideKill
+  - DamageBox
   layers:
   - Default
   - TransparentFX

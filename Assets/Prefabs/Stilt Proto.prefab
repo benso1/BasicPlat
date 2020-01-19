@@ -89,7 +89,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5802422864039178018}
-  - {fileID: 3566021548929886542}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -200,86 +199,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfcf54f53bb8be34ab77ee4682dca6a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ps: {fileID: 3566021548929886543}
+  ps: {fileID: 0}
   transformer: {fileID: 7727420870110377198}
---- !u!1001 &8523780981110329315
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 7727420870110377198}
-    m_Modifications:
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: -90
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5131711109691434670, guid: d0a42127d74178e41a851779f65fe7c2,
-        type: 3}
-      propertyPath: m_Name
-      value: Cool Light Spray
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d0a42127d74178e41a851779f65fe7c2, type: 3}
---- !u!4 &3566021548929886542 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5131711109691434669, guid: d0a42127d74178e41a851779f65fe7c2,
-    type: 3}
-  m_PrefabInstance: {fileID: 8523780981110329315}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &3566021548929886543 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 5131711109691434668, guid: d0a42127d74178e41a851779f65fe7c2,
-    type: 3}
-  m_PrefabInstance: {fileID: 8523780981110329315}
-  m_PrefabAsset: {fileID: 0}

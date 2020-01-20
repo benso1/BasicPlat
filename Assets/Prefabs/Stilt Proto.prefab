@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5802422864039178018}
   - component: {fileID: 6227864337523777598}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: DestroyZone
   m_TagString: SlideKill
   m_Icon: {fileID: 0}
@@ -70,7 +70,7 @@ GameObject:
   - component: {fileID: 2168652370906522501}
   - component: {fileID: 5031992694875331740}
   - component: {fileID: 114776819907242822}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Stilt Proto
   m_TagString: DamageBox
   m_Icon: {fileID: 0}
@@ -156,7 +156,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 20446916960f8f046ac7ed828152cfbf, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 0
   m_CollisionDetection: 0
@@ -200,3 +200,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transformer: {fileID: 7727420870110377198}
+  type: 0

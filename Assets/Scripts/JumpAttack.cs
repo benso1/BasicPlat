@@ -13,8 +13,6 @@ public class JumpAttack : MonoBehaviour
         if(collision.gameObject.tag == "JumpKill"){
             collision.gameObject.transform.parent.gameObject.GetComponent<EnemyBouncer>().Damage();
             Player.GetComponent<Move2d>().EnemyBounce();
-            Debug.Log("Jump");
-            Debug.Log(collision.gameObject.tag);
         }
     }
     private void OnTriggerExit2D(Collider2D collision){

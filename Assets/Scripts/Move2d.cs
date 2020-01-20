@@ -648,7 +648,7 @@ public class Move2d : MonoBehaviour
         return isSliding;
     }
     public void Damage(){
-        //player.GetComponent<SpriteRenderer>().flipY = !player.GetComponent<SpriteRenderer>().flipY;
+        player.GetComponent<SpriteRenderer>().flipY = !player.GetComponent<SpriteRenderer>().flipY;
     }
     public void Killed(GameObject obj){
         recentlyKilled = obj;

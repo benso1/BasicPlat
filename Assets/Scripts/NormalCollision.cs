@@ -10,18 +10,12 @@ public class NormalCollision : MonoBehaviour
     }
 
     private void OnCollisionEnter2D(Collision2D collision){
-        if(collision.gameObject.tag == "DamageBox"){
+        if(collision.gameObject.tag == "DamageBox"){// && Player.GetComponent<Move2d>().lastKilled() == collision.gameObject){
             Player.GetComponent<Move2d>().Damage();
+            Debug.Log("Ouch");
+            //Debug.Log(collision.gameObject.tag);
         }
     }
     private void OnCollisionExit2D(Collision2D collision){
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision){
-        if(collision.gameObject.tag == "SlideKill" && Player.GetComponent<Move2d>().slideAttack()){
-            collision.gameObject.transform.parent.gameObject.GetComponent<EnemyStilt>().Damage();
-        }
-    }
-    private void OnTriggerExit2D(Collider2D collision){
     }
 }

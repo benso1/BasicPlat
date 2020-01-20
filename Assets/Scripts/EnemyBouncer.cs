@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyStilt : MonoBehaviour
+public class EnemyBouncer : MonoBehaviour
 {
     GameObject Enemy;
     public Transform transformer;
     public enum Type{
-        STAYER 
+        STAYER, 
     }
     public Type type;
     void Start(){

@@ -96,7 +96,7 @@ public class Move2d : MonoBehaviour
     private bool isDoubleJumping = false;
     private bool isWallJumping = false;
     private bool isDashing = false;
-    private bool isSliding = false;
+    public bool isSliding = false;
     private bool isWallRunning = false;
     private bool isBarSwinging = false;
     private bool isBumperJumping = false;
@@ -125,6 +125,7 @@ public class Move2d : MonoBehaviour
     public Rigidbody2D rb;
     public ParticleSystem ps;
     public ParticleSystem.MainModule main;
+    private GameObject recentlyKilled;
 //Functions
     void Start(){ //Initializes variables
         dampSpeed = 220 / speedCapX;
@@ -205,6 +206,9 @@ public class Move2d : MonoBehaviour
             if(keepSliding){
                 slideTimer = 0f;
                 player.localScale = new Vector3(player.localScale.x, playerScaleY / 2f, player.localScale.z);
+            }
+            else{
+                isSliding = false;
             }
         }
         if(slideAdj){
@@ -644,6 +648,15 @@ public class Move2d : MonoBehaviour
         return isSliding;
     }
     public void Damage(){
-        player.GetComponent<SpriteRenderer>().flipY = !player.GetComponent<SpriteRenderer>().flipY;
+        //player.GetComponent<SpriteRenderer>().flipY = !player.GetComponent<SpriteRenderer>().flipY;
+    }
+    public void Killed(GameObject obj){
+        recentlyKilled = obj;
+    }
+    public GameObject lastKilled(){
+        return recentlyKilled;
+    }
+    public void EnemyBounce(){
+        SetYVelocity(0, jumpHeight);
     }
 }

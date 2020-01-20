@@ -12,6 +12,7 @@ TagManager:
   - SlideKill
   - DamageBox
   - Disabled
+  - JumpKill
   layers:
   - Default
   - TransparentFX
